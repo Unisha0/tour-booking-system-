@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sajilo Yatra Dashboard</title>
+    <link rel="stylesheet" href="{% static 'tour/style.css' %}">
+    <link rel="stylesheet" href="{% static 'tour/pages.css' %}">
+</head>
+<body>
+
+<!-- SIDEBAR / NAV (keep SAME as your design) -->
+
+<h2>Available Tours</h2>
+
+{% for tour in tours %}
+<div class="card">
+    <img src="{% static 'tour/mustang.png' %}">
+    <h3>{{ tour.title }}</h3>
+    <p>{{ tour.destination }}</p>
+    <p>Rs. {{ tour.price }}</p>
+    <a href="{% url 'book_tour' tour.id %}">Book Now</a>
+</div>
+{% endfor %}
+
+</body>
+</html>

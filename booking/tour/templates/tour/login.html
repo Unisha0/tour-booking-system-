@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sajilo Yatra | Login</title>
+    <link rel="stylesheet" href="{% static 'tour/css/auth.css' %}">
+</head>
+<body>
+
+<div class="auth-box">
+    <h2>Login</h2>
+
+    <form>
+        <input type="text" placeholder="Username" required>
+        <input type="password" placeholder="Password" required>
+        <button>Login</button>
+    </form>
+
+    <p>Don’t have an account?
+        <a href="signup.html">Signup</a>
+    </p>
+</div>
+
+</body>
+</html>

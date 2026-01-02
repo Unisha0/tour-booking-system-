@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sajilo Yatra | Dashboard</title>
+    <link rel="stylesheet" href="{% static 'tour/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'tour/css/pages.css' %}">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>Sajilo Yatra</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="Transaction.html">Transactions</a>
+    <a href="Ticket.html">Tickets</a>
+    <a href="Fav.html">Favorites</a>
+    <a href="message.html">Messages</a>
+    <a href="setting.html">Settings</a>
+</div>
+
+<div class="main">
+    <h2>Available Tours</h2>
+
+    <div class="cards">
+        <div class="card">
+            <img src="{% static 'tour/images/mustang.png' %}">
+            <h3>Mustang Tour</h3>
+            <p>7 Days Adventure</p>
+            <span>Rs. 80,000</span>
+        </div>
+
+        <div class="card">
+            <img src="{% static 'tour/images/image.png' %}">
+            <h3>Pokhara Tour</h3>
+            <p>5 Days Relax</p>
+            <span>Rs. 35,000</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
