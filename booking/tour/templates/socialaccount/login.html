@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign In" %} - Sajilo Yatra{% endblock %}
+
+{% block content %}
+<div class="section" style="background: white; min-height: 60vh; display: flex; align-items: center;">
+    <div style="max-width: 600px; margin: 0 auto; width: 100%; padding: 40px 30px;">
+        
+        <div style="background: linear-gradient(135deg, #1E6B9E 0%, #17A2B8 100%); color: white; padding: 40px; border-radius: 8px; margin-bottom: 40px; text-align: center;">
+            {% if process == "connect" %}
+                <h1 style="font-size: 34px; font-weight: 800; margin-bottom: 15px;">
+                    🔗 Connect Your Google Account
+                </h1>
+                <p style="font-size: 16px; opacity: 0.95; margin: 0;">
+                    You are about to connect a new Google account to your Sajilo Yatra profile. This will link your accounts together.
+                </p>
+            {% else %}
+                <h1 style="font-size: 34px; font-weight: 800; margin-bottom: 15px;">
+                    👋 Welcome to Sajilo Yatra
+                </h1>
+                <p style="font-size: 16px; opacity: 0.95; margin: 0;">
+                    You are about to sign in using your Google account. Let's get started with your Nepal adventure!
+                </p>
+            {% endif %}
+        </div>
+
+        <div style="background: var(--light-bg); padding: 40px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <h2 style="font-size: 22px; color: var(--primary); margin-bottom: 25px; font-weight: 700; text-align: center;">
+                {{ provider.name }} Account
+            </h2>
+
+            <div style="background: white; padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--accent);">
+                <p style="color: var(--text-gray); margin: 0; font-size: 15px; line-height: 1.6;">
+                    {% if process == "connect" %}
+                        <strong>{{ provider.name }}</strong> will be connected to your account. You'll be able to use this method to sign in quickly.
+                    {% else %}
+                        We'll use your <strong>Google profile</strong> to create or log into your Sajilo Yatra account. Your personal data is safe and secure.
+                    {% endif %}
+                </p>
+            </div>
+
+            <form method="post" style="display: flex; flex-direction: column; gap: 15px;">
+                {% csrf_token %}
+                
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; padding: 14px 25px; font-size: 16px;">
+                    ✓ Continue with Google
+                </button>
+                
+                <a href="/" class="btn btn-secondary btn-lg" style="width: 100%; padding: 14px 25px; font-size: 16px; text-align: center;">
+                    ← Back to Home
+                </a>
+            </form>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: var(--light-bg); border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
+            <p style="color: var(--text-gray); font-size: 13px; margin: 0;">
+                💡 Your privacy is important to us. We never store your Google password and only access information you authorize.
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

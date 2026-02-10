@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .booking-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .price-total {
+            font-size: 20px;
+            color: #667eea;
+            margin-top: 10px;
+        }
+        
+        .payment-methods {
+            margin: 30px 0;
+        }
+        
+        .payment-methods h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .method-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .method-option {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .method-option input[type="radio"] {
+            display: none;
+        }
+        
+        .method-option label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .method-option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: #f0f4ff;
+            color: #667eea;
+        }
+        
+        .method-option label:hover {
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-proceed {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-proceed:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-cancel {
+            background: #e9ecef;
+            color: #666;
+        }
+        
+        .btn-cancel:hover {
+            background: #dee2e6;
+        }
+        
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: #28a745;
+            font-size: 14px;
+        }
+        
+        .security-badge::before {
+            content: "🔒";
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Complete Payment</h1>
+            <p>Secure payment processing for your tour booking</p>
+        </div>
+        
+        <div class="booking-details">
+            <h3 style="margin-bottom: 15px; color: #333;">Booking Summary</h3>
+            <div class="detail-row">
+                <span class="detail-label">Tour Package:</span>
+                <span class="detail-value">{{ booking.tour.title }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Destination:</span>
+                <span class="detail-value">{{ booking.tour.destination }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Duration:</span>
+                <span class="detail-value">{{ booking.days }} Days</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Persons:</span>
+                <span class="detail-value">{{ booking.persons }}</span>
+            </div>
+            {% if booking.hotel %}
+            <div class="detail-row">
+                <span class="detail-label">Hotel:</span>
+                <span class="detail-value">{{ booking.hotel.name }}</span>
+            </div>
+            {% endif %}
+            <div class="detail-row price-total">
+                <span class="detail-label">Total Amount:</span>
+                <span>Rs. {{ total_price }}</span>
+            </div>
+        </div>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="payment-methods">
+                <h3>Select Payment Method</h3>
+                <div class="method-group">
+                    <div class="method-option">
+                        <input type="radio" id="esewa" name="payment_method" value="esewa" checked>
+                        <label for="esewa">
+                            <span>💳</span>
+                            <br>
+                            eSewa
+                        </label>
+                    </div>
+                    <div class="method-option">
+                        <input type="radio" id="khalti" name="payment_method" value="khalti">
+                        <label for="khalti">
+                            <span>💰</span>
+                            <br>
+                            Khalti
+                        </label>
+                    </div>
+                    <div class="method-option">
+                        <input type="radio" id="offline" name="payment_method" value="offline">
+                        <label for="offline">
+                            <span>📝</span>
+                            <br>
+                            Bank Transfer
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <a href="{% url 'book_tour' booking.tour.id %}" class="btn-cancel" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Cancel</a>
+                <button type="submit" class="btn-proceed">Proceed to Payment</button>
+            </div>
+        </form>
+        
+        <div class="security-badge">
+            Your payment is secure and encrypted
+        </div>
+    </div>
+</body>
+</html>

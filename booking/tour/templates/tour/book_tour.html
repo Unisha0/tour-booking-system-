@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+/* ===== Booking Page Container ===== */
+.booking-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #f7f9fc;
+    border-radius: 20px;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* ===== Header ===== */
+.booking-header h2 {
+    color: #1e88e5;
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.booking-header p {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.booking-header b {
+    color: #1e88e5;
+}
+
+/* Highlight keywords in description */
+.tour-description span.highlight {
+    font-weight: 700;
+    color: #1e88e5;
+    display: block;
+    margin-top: 15px;
+    font-size: 17px;
+}
+
+/* ===== Gallery Grid ===== */
+.tour-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.tour-gallery-grid img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.tour-gallery-grid img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* ===== Places Covered Grid ===== */
+.tour-places h3 {
+    color: #1e88e5;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.places-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.place-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.place-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.place-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.place-card h4 {
+    color: #1e88e5;
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.place-card p {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ===== Booking Form ===== */
+.booking-form {
+    background: #fff;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    margin-top: 40px;
+}
+
+.booking-form label {
+    display: block;
+    margin-top: 14px;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.booking-form select,
+.booking-form input[type=number] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-top: 6px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.booking-form select:focus,
+.booking-form input[type=number]:focus {
+    border-color: #1e88e5;
+    outline: none;
+}
+
+.booking-form button {
+    margin-top: 25px;
+    padding: 14px 20px;
+    background: #1e88e5;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.booking-form button:hover {
+    background: #1565c0;
+    transform: scale(1.02);
+}
+
+.total-price {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #1e88e5;
+    font-size: 17px;
+}
+
+/* ===== Responsive ===== */
+@media(max-width:768px){
+    .tour-gallery-grid { grid-template-columns: 1fr 1fr; }
+    .places-grid { grid-template-columns: 1fr; }
+}
+
+@media(max-width:480px){
+    .tour-gallery-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="booking-container">
+
+    <!-- Tour Header -->
+    <div class="booking-header">
+        <h2>{{ tour.title }}</h2>
+        <p><b>Destination:</b> {{ tour.destination }}</p>
+        <p><b>Duration:</b> {{ tour.duration_days }} Days | <b>Base Price:</b> Rs {{ tour.base_price }}</p>
+        <div class="tour-description" id="tour-description">
+            {{ tour.description|linebreaksbr }}
+        </div>
+    </div>
+
+    <!-- Image Gallery Grid -->
+    <div class="tour-gallery-grid">
+        {% for img in tour.images.all %}
+            <img src="{{ img.image.url }}" alt="{{ tour.title }}">
+        {% empty %}
+            <img src="{% static 'tour/images/image.png' %}" alt="No Image">
+        {% endfor %}
+    </div>
+
+<!-- Places Covered as Timeline/List -->
+<div class="tour-places">
+    <h3>Places Covered</h3>
+    <ul class="places-list">
+        {% for place in tour.places.all %}
+            <li>
+                <div class="place-marker"></div>
+                <div class="place-content">
+                    <h4>{{ place.title }}</h4>
+                    <p>{{ place.description|linebreaksbr }}</p>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<style>
+/* ===== Places Covered Timeline/List ===== */
+.tour-places h3 {
+    color: #1e88e5;
+    margin-bottom: 25px;
+    font-size: 24px;
+}
+
+.places-list {
+    list-style: none;
+    padding-left: 0;
+    position: relative;
+    margin-left: 20px;
+}
+
+.places-list li {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 25px;
+    transition: transform 0.3s, background 0.3s;
+}
+
+.place-marker {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 16px;
+    height: 16px;
+    background: #1e88e5;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.place-content h4 {
+    font-size: 18px;
+    color: #1e88e5;
+    margin-bottom: 5px;
+}
+
+.place-content p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Timeline Line */
+.places-list::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: #1e88e5;
+    opacity: 0.3;
+}
+
+/* Hover Animation */
+.places-list li:hover .place-content {
+    transform: translateX(5px);
+    transition: transform 0.3s;
+}
+
+/* Responsive */
+@media(max-width:768px){
+    .places-list li {
+        padding-left: 30px;
+    }
+    .place-marker {
+        left: -2px;
+    }
+    .places-list::before {
+        left: 5px;
+    }
+}
+</style>
+
+
+    <!-- Booking Form -->
+    <form method="post" class="booking-form">
+        {% csrf_token %}
+        <label>Number of Days:</label>
+        {{ form.days }}
+
+        <label>Choose Hotel:</label>
+        <select name="hotel">
+            <option value="">Select Hotel</option>
+            {% for hotel in form.fields.hotel.queryset %}
+                <option value="{{ hotel.id }}" data-price="{{ hotel.price_per_day }}">
+                    {{ hotel.name }} - NRs {{ hotel.price_per_day }}/day
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Add-ons:</label>
+        {% for addon in form.fields.addons.queryset %}
+            <label>
+                <input type="checkbox" name="addons" value="{{ addon.id }}" data-price="{{ addon.price }}">
+                {{ addon.name }} - NRs {{ addon.price }}
+            </label>
+        {% endfor %}
+
+        <div class="total-price" id="total-price"></div>
+        <button type="submit">Book Now</button>
+    </form>
+</div>
+
+<script>
+// Highlight Keywords in Description
+const keywords = ["Introduction","Geography and Landscape","Major Attractions","Culture and Lifestyle","Travel and Experience"];
+const descDiv = document.getElementById('tour-description');
+let html = descDiv.innerHTML;
+keywords.forEach(word => {
+    const re = new RegExp(word, 'g');
+    html = html.replace(re, `<span class="highlight">${word}</span>`);
+});
+descDiv.innerHTML = html;
+
+// Price Calculation
+const daysInput = document.querySelector('input[name="days"]');
+const hotelSelect = document.querySelector('select[name="hotel"]');
+const addonCheckboxes = document.querySelectorAll('input[name="addons"]');
+const priceDiv = document.getElementById('total-price');
+
+function calculatePrice() {
+    let days = parseInt(daysInput.value) || 1;
+    let base = {{ tour.base_price }};
+
+    if (days == 2) base *= 0.9;
+    else if (days >= 3) base *= 0.85;
+
+    let hotelPrice = parseInt(hotelSelect.options[hotelSelect.selectedIndex].dataset.price || 0);
+    base += hotelPrice * days;
+
+    addonCheckboxes.forEach(cb => { if(cb.checked) base += parseInt(cb.dataset.price); });
+
+    priceDiv.innerHTML = `Total Price: NRs ${base}`;
+}
+
+daysInput.addEventListener('change', calculatePrice);
+hotelSelect.addEventListener('change', calculatePrice);
+addonCheckboxes.forEach(cb => cb.addEventListener('change', calculatePrice));
+calculatePrice();
+</script>
+
+{% endblock %}

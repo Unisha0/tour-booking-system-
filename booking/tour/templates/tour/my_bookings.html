@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings — Sajilo Yatra{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* ===============================
+   Page Container
+================================ */
+.bookings-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px 20px 60px;
+}
+
+/* ===============================
+   Header
+================================ */
+.page-header {
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.page-header p {
+    margin: 0;
+    color: var(--text-gray);
+}
+
+/* ===============================
+   Stats Cards
+================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+}
+
+.stat-card h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--text-gray);
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+/* ===============================
+   Table Section
+================================ */
+.table-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #1E6B9E;
+    color: #fff;
+}
+
+th, td {
+    padding: 12px 14px;
+    text-align: center;
+    font-size: 14px;
+}
+
+tbody tr {
+    border-bottom: 1px solid #eef2f6;
+}
+
+tbody tr:hover {
+    background: #f6fbff;
+}
+
+/* ===============================
+   Status Badges
+================================ */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-confirmed {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-pending {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.badge-cancelled,
+.badge-failed {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* ===============================
+   Empty State
+================================ */
+.empty-row {
+    padding: 30px;
+    text-align: center;
+    color: var(--text-gray);
+}
+
+/* ===============================
+   Responsive Table
+================================ */
+@media (max-width: 768px) {
+
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead {
+        display: none;
+    }
+
+    tbody tr {
+        margin-bottom: 12px;
+        padding: 12px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+    }
+
+    td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 6px;
+    }
+
+    td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #555;
+    }
+}
+
+</style>
+
+<div class="bookings-container">
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1>My Bookings</h1>
+        <p>Track your tour reservations and payment status</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h4>Total Bookings</h4>
+            <p>{{ bookings.count }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h4>Latest Booking</h4>
+            <p>
+                {% if bookings %}
+                    {{ bookings.0.booking_date|date:"M d, Y" }}
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Tour</th>
+                    <th>Destination</th>
+                    <th>Persons</th>
+                    <th>Total Price</th>
+                    <th>Booking Status</th>
+                    <th>Payment Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for booking in bookings %}
+            <tr>
+
+                <td data-label="Tour">
+                    {{ booking.tour.title }}
+                </td>
+
+                <td data-label="Destination">
+                    {{ booking.tour.destination }}
+                </td>
+
+                <td data-label="Persons">
+                    {{ booking.persons }}
+                </td>
+
+                <td data-label="Total Price">
+                    Rs {{ booking.computed_total_price }}
+                </td>
+
+                <td data-label="Booking Status">
+                    {% if booking.status == "pending" %}
+                        <span class="badge badge-pending">Pending</span>
+                    {% elif booking.status == "confirmed" %}
+                        <span class="badge badge-confirmed">Confirmed</span>
+                    {% else %}
+                        <span class="badge badge-cancelled">Cancelled</span>
+                    {% endif %}
+                </td>
+
+                <td data-label="Payment Status">
+                    {% if booking.payment %}
+                        {% if booking.payment.status == "pending" %}
+                            <span class="badge badge-pending">Pending</span>
+                        {% elif booking.payment.status == "completed" %}
+                            <span class="badge badge-confirmed">Completed</span>
+                        {% else %}
+                            <span class="badge badge-failed">Failed</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge badge-pending">Not Started</span>
+                    {% endif %}
+                </td>
+
+                <td data-label="Date">
+                    {{ booking.booking_date|date:"M d, Y" }}
+                </td>
+
+                <td data-label="Action">
+
+                    {% if booking.status == "pending" %}
+                        <a href="{% url 'payment_gateway' booking.id %}"
+                           style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                           Pay Now
+                        </a>
+
+                    {% elif booking.status == "confirmed" %}
+                        <span style="color:#2e7d32;font-weight:600;">
+                            Confirmed
+                        </span>
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="8" class="empty-row">
+                    No bookings available
+                </td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

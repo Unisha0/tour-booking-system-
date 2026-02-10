@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotels - Sajilo Yatra{% endblock %}
+
+{% block content %}
+    <div class="section" style="background: white;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h2 class="section-title">Hotels</h2>
+            <p class="section-subtitle">All hotel options available in the system</p>
+
+            <div class="cards-grid">
+                {% for hotel in hotels %}
+                    <div class="card" style="text-align: center;">
+                        <div class="card-image" style="padding: 0; background: var(--light-bg);">
+                            {% if hotel.hotel_image %}
+                                <img src="{{ hotel.hotel_image.url }}" alt="{{ hotel.name }}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px 8px 0 0;">
+                            {% else %}
+                                <div style="height: 180px; display: grid; place-items: center; font-size: 42px;">🏨</div>
+                            {% endif %}
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">{{ hotel.name }}</h3>
+                            <p class="card-description">NRs {{ hotel.price_per_day }} per day</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <p style="font-size: 18px; color: var(--text-gray);">No hotels added yet</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

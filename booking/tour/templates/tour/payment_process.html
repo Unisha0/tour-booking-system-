@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment Processing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .payment-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .payment-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .payment-header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .payment-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .payment-content {
+            padding: 40px 30px;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 0;
+        }
+        
+        .step {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-circle {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .step.completed .step-circle {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+        
+        .card-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            position: relative;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-chip {
+            width: 50px;
+            height: 40px;
+            background: #ffd700;
+            border-radius: 8px;
+        }
+        
+        .card-number {
+            letter-spacing: 2px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .card-holder {
+            font-size: 12px;
+        }
+        
+        .card-holder-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        
+        .card-expiry {
+            text-align: right;
+            font-size: 12px;
+        }
+        
+        .amount-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .amount-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .amount-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .processing-section {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .processing-section.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .processing-text {
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        
+        .processing-details {
+            font-size: 13px;
+            color: #999;
+            margin-top: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-pay {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-pay:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-cancel {
+            background: #e9ecef;
+            color: #666;
+        }
+        
+        .btn-cancel:hover {
+            background: #dee2e6;
+        }
+        
+        .security-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #4caf50;
+            font-size: 13px;
+        }
+        
+        .otp-section {
+            display: none;
+        }
+        
+        .otp-section.active {
+            display: block;
+        }
+        
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .otp-input {
+            width: 50px !important;
+            height: 50px !important;
+            text-align: center;
+            font-size: 24px !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1>Secure Payment</h1>
+            <p>{{ payment.get_payment_method_display }} - Complete your booking</p>
+        </div>
+        
+        <div class="payment-content">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step completed">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Booking</div>
+                </div>
+                <div class="step active" id="paymentStep">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Payment</div>
+                </div>
+                <div class="step" id="confirmStep">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Confirmation</div>
+                </div>
+            </div>
+            
+            <!-- Payment Form Section -->
+            <div id="paymentForm">
+                {% if payment.payment_method == 'esewa' %}
+                <!-- eSewa Payment Form -->
+                <div class="card-preview">
+                    <div class="card-top">
+                        <div style="font-size: 24px; font-weight: bold;">eSewa</div>
+                        <div class="card-chip"></div>
+                    </div>
+                    <div class="card-number" id="cardNumberDisplay">•••• •••• •••• ••••</div>
+                    <div class="card-bottom">
+                        <div class="card-holder">
+                            <div class="card-holder-name" id="cardHolderDisplay">Your Name</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="paymentFormElement" onsubmit="processPayment(event)">
+                    <div class="form-group">
+                        <label>eSewa Account Email</label>
+                        <input type="email" id="esewaEmail" placeholder="your.email@example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>eSewa Password</label>
+                        <input type="password" placeholder="••••••••" required>
+                    </div>
+                    
+                    <div class="amount-section">
+                        <div class="amount-label">Amount to be Charged</div>
+                        <div class="amount-value">Rs. {{ total_price }}</div>
+                    </div>
+                    
+                    {% elif payment.payment_method == 'khalti' %}
+                    <!-- Khalti Payment Form -->
+                    <div class="card-preview" style="background: linear-gradient(135deg, #5b2c6f 0%, #1a237e 100%);">
+                        <div class="card-top">
+                            <div style="font-size: 24px; font-weight: bold;">Khalti</div>
+                            <div class="card-chip"></div>
+                        </div>
+                        <div class="card-number" id="cardNumberDisplay2">•••• •••• •••• ••••</div>
+                        <div class="card-bottom">
+                            <div class="card-holder">
+                                <div class="card-holder-name" id="cardHolderDisplay2">Your Name</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="paymentFormElement" onsubmit="processPayment(event)">
+                        <div class="form-group">
+                            <label>Mobile Number</label>
+                            <input type="tel" id="khaltiPhone" placeholder="98XXXXXXXX" pattern="[0-9]{10}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Khalti PIN</label>
+                            <input type="password" placeholder="••••" pattern="[0-9]{4}" required>
+                        </div>
+                        
+                        <div class="amount-section">
+                            <div class="amount-label">Amount to be Charged</div>
+                            <div class="amount-value">Rs. {{ total_price }}</div>
+                        </div>
+                    
+                    {% else %}
+                    <!-- Bank Transfer Form -->
+                    <form id="paymentFormElement" onsubmit="processPayment(event)">
+                        <div class="amount-section">
+                            <div class="amount-label">Amount to Transfer</div>
+                            <div class="amount-value">Rs. {{ total_price }}</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #333;">Bank Details</h3>
+                            <div class="form-group">
+                                <label>Bank Name</label>
+                                <input type="text" value="Nepal Investment Bank" readonly style="background: #e9ecef;">
+                            </div>
+                            <div class="form-group">
+                                <label>Account Number</label>
+                                <input type="text" value="123456789012345" readonly style="background: #e9ecef; cursor: pointer;" onclick="navigator.clipboard.writeText('123456789012345')">
+                                <small style="color: #667eea; cursor: pointer;">Click to copy</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Account Holder</label>
+                                <input type="text" value="Sajilo Yatra Tourism" readonly style="background: #e9ecef;">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Transaction Reference ID</label>
+                            <input type="text" id="refId" placeholder="Enter reference ID from bank slip" required>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="button-group">
+                        <a href="{% url 'payment_gateway' booking.id %}" class="btn-cancel" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Cancel</a>
+                        <button type="button" class="btn-pay" onclick="simulateProcessing()">Pay Now</button>
+                    </div>
+                    
+                    <div class="security-info">
+                        🔒 Your payment is 100% secure and encrypted
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Processing Section -->
+            <div class="processing-section" id="processingSection">
+                <div class="spinner"></div>
+                <div class="processing-text">Processing Your Payment...</div>
+                <div class="processing-details">
+                    Please don't refresh or close this page.<br>
+                    Transaction ID: <strong>TXN{{ booking.id }}{{ payment.id }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function simulateProcessing() {
+            // Hide form and show processing
+            document.getElementById('paymentForm').style.display = 'none';
+            document.getElementById('processingSection').classList.add('active');
+            
+            // Update step indicator
+            document.getElementById('paymentStep').classList.remove('active');
+            document.getElementById('paymentStep').classList.add('completed');
+            document.getElementById('confirmStep').classList.add('active');
+            
+            // Simulate payment processing (3-5 seconds)
+            const randomDelay = Math.random() * 2000 + 3000; // 3-5 seconds
+            
+            setTimeout(() => {
+                // 80% chance of success, 20% chance of failure
+                const isSuccess = Math.random() < 0.8;
+                
+                if (isSuccess) {
+                    // Payment successful - submit form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.innerHTML = `
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        <input type="hidden" name="payment_status" value="success">
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    // Payment failed - show error and redirect
+                    alert('Payment Failed: Unable to process your payment at this time. Please try again or choose another payment method.');
+                    window.location.href = '{% url "payment_gateway" booking.id %}';
+                }
+            }, randomDelay);
+        }
+        
+        function processPayment(event) {
+            event.preventDefault();
+            simulateProcessing();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+{% load static %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sajilo Yatra | Signup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1E6B9E 0%, #17A2B8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 460px;
+            background: white;
+            border-radius: 8px;
+            padding: 35px 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            color: #2C3E50;
+            animation: fadeUp 0.6s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #1E6B9E;
+        }
+
+        /* Google Button */
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            background: #F8F9FA;
+            color: #2C3E50;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 18px;
+            transition: all 0.3s ease;
+            border: 1px solid #E0E0E0;
+        }
+
+        .btn-google svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-google:hover {
+            background: #E6E8EB;
+            border-color: #D0D0D0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #E0E0E0;
+            outline: none;
+            font-size: 15px;
+            background: white;
+            color: #2C3E50;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #1E6B9E;
+            box-shadow: 0 0 0 3px rgba(30, 107, 158, 0.1);
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            background: #1E6B9E;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #154B7A;
+            box-shadow: 0 4px 15px rgba(30, 107, 158, 0.3);
+        }
+
+        .errors, .field-errors {
+            background: #F8D7DA;
+            color: #721C24;
+            padding: 10px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            border-left: 4px solid #E74C3C;
+        }
+
+        p {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 14px;
+            color: #2C3E50;
+        }
+
+        p a {
+            color: #1E6B9E;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        p a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .auth-box {
+                padding: 28px 22px;
+            }
+            .auth-box h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="auth-box">
+    <h2>Signup</h2>
+
+    <!-- Google Signup -->
+    <a class="btn-google" href="{% provider_login_url 'google' %}">
+        <svg viewBox="0 0 533.5 544.3" aria-hidden="true">
+            <path fill="#4285F4" d="M533.5 278.4c0-17.4-1.4-34.1-4-50.4H272v95.3h146.9c-6.3 34-25 62.8-53.4 82.1v68h86.4c50.5-46.5 81.6-115.1 81.6-195z"/>
+            <path fill="#34A853" d="M272 544.3c72.6 0 133.6-24.1 178.1-65.3l-86.4-68c-24 16.1-54.7 25.7-91.7 25.7-70.6 0-130.4-47.6-151.8-111.6h-89v69.9C75.6 475.1 168.1 544.3 272 544.3z"/>
+            <path fill="#FBBC05" d="M120.2 325.1c-10.1-30-10.1-62.1 0-92.1v-69.9h-89C-8.7 239.3-8.7 304.9 31.2 370.9l89-69.8z"/>
+            <path fill="#EA4335" d="M272 107.7c39.5-.6 77.6 14.4 106.6 41.9l79.4-79.4C410.5 24.5 343.5-1.3 272 0 168.1 0 75.6 69.2 31.2 163.1l89 69.9C141.6 155.3 201.4 107.7 272 107.7z"/>
+        </svg>
+        Continue with Google
+    </a>
+
+    <!-- Signup Form -->
+    <form action="{% url 'signup' %}" method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <input type="text" name="name" placeholder="Name"
+               value="{{ form.name.value|default:'' }}" required>
+        {% if form.name.errors %}
+            <div class="field-errors">{{ form.name.errors.0 }}</div>
+        {% endif %}
+
+        <input type="email" name="email" placeholder="Email"
+               value="{{ form.email.value|default:'' }}" required>
+        {% if form.email.errors %}
+            <div class="field-errors">{{ form.email.errors.0 }}</div>
+        {% endif %}
+
+        <input type="text" name="phone_number"
+               placeholder="Phone (e.g., 98XXXXXXXX)"
+               value="{{ form.phone_number.value|default:'' }}"
+               required inputmode="numeric" maxlength="10">
+        {% if form.phone_number.errors %}
+            <div class="field-errors">{{ form.phone_number.errors.0 }}</div>
+        {% endif %}
+
+        <input type="password" name="password1" placeholder="Password" required>
+        {% if form.password1.errors %}
+            <div class="field-errors">{{ form.password1.errors.0 }}</div>
+        {% endif %}
+
+        <input type="password" name="password2" placeholder="Confirm Password" required>
+        {% if form.password2.errors %}
+            <div class="field-errors">{{ form.password2.errors.0 }}</div>
+        {% endif %}
+
+        <button type="submit">Signup</button>
+    </form>
+
+    <p>Already have an account?
+        <a href="{% url 'login' %}">Login</a>
+    </p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var phone = document.querySelector('input[name="phone_number"]');
+    if (phone) {
+        phone.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+    }
+});
+</script>
+
+</body>
+</html>

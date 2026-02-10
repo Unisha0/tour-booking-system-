@@ -1,25 +1,235 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Sajilo Yatra | Login</title>
-    <link rel="stylesheet" href="{% static 'tour/css/auth.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1E6B9E 0%, #17A2B8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 8px;
+            padding: 35px 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            color: #2C3E50;
+            animation: fadeUp 0.6s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-box h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #1E6B9E;
+            letter-spacing: 0.5px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 5px;
+            border: 1px solid #E0E0E0;
+            outline: none;
+            font-size: 15px;
+            background: white;
+            color: #2C3E50;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #1E6B9E;
+            box-shadow: 0 0 0 3px rgba(30, 107, 158, 0.1);
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .password-toggle svg {
+            width: 22px;
+            height: 22px;
+            fill: #7F8C8D;
+        }
+
+        .password-field input {
+            padding-right: 45px;
+        }
+
+        button[type="submit"], form > button {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            background: #1E6B9E;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #154B7A;
+            box-shadow: 0 4px 15px rgba(30, 107, 158, 0.3);
+        }
+
+        .errors, .field-errors {
+            background: #F8D7DA;
+            color: #721C24;
+            padding: 10px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            border-left: 4px solid #E74C3C;
+        }
+
+        p {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 14px;
+            color: #2C3E50;
+        }
+
+        p a {
+            color: #1E6B9E;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        p a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .auth-box {
+                padding: 28px 22px;
+            }
+
+            .auth-box h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
 <div class="auth-box">
     <h2>Login</h2>
 
-    <form>
-        <input type="text" placeholder="Username" required>
-        <input type="password" placeholder="Password" required>
-        <button>Login</button>
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <input type="text" name="identifier" placeholder="Phone"
+               value="{{ form.identifier.value|default:'' }}"
+               required inputmode="numeric" maxlength="10">
+
+        {% if form.identifier.errors %}
+            <div class="field-errors">{{ form.identifier.errors.0 }}</div>
+        {% endif %}
+
+        <div class="password-field">
+            <button type="button" id="togglePassword" class="password-toggle"
+                    aria-pressed="false" aria-label="Show password">
+
+                <svg id="iconEyeOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+                </svg>
+
+                <svg id="iconEyeClosed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none">
+                    <path d="M3.27 2L2 3.27l3.11 3.11A10 10 0 0 0 1 12c1.73 3.89 6 7 11 7 1.76 0 3.43-.35 4.95-.98L20 19.03 21.27 17.76 3.27 2z"/>
+                </svg>
+            </button>
+
+            <input id="id_password" type="password" name="password" placeholder="Password" required>
+        </div>
+
+        {% if form.password.errors %}
+            <div class="field-errors">{{ form.password.errors.0 }}</div>
+        {% endif %}
+
+        <button type="submit">Login</button>
     </form>
 
     <p>Don’t have an account?
-        <a href="signup.html">Signup</a>
+        <a href="{% url 'signup' %}">Signup</a>
     </p>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    var id = document.querySelector('input[name="identifier"]');
+    if (id) {
+        id.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+    }
+
+    var toggle = document.getElementById('togglePassword');
+    var pwd = document.getElementById('id_password');
+    var eyeOpen = document.getElementById('iconEyeOpen');
+    var eyeClosed = document.getElementById('iconEyeClosed');
+
+    toggle.addEventListener('click', function () {
+        var isPassword = pwd.type === 'password';
+        pwd.type = isPassword ? 'text' : 'password';
+        eyeOpen.style.display = isPassword ? 'none' : 'block';
+        eyeClosed.style.display = isPassword ? 'block' : 'none';
+    });
+});
+</script>
 
 </body>
 </html>

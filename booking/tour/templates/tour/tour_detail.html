@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ tour.title }} | Sajilo Yatra{% endblock %}
+
+{% block content %}
+<div class="section" style="background: white;">
+    <div style="max-width: 900px; margin: 0 auto;">
+        <h1 style="font-size: 42px; font-weight: 800; color: var(--primary); margin-bottom: 10px;">{{ tour.title }}</h1>
+        
+        <div style="display: flex; gap: 40px; margin-bottom: 40px; flex-wrap: wrap;">
+            <span style="font-weight: 700; color: var(--primary);">📍 {{ tour.destination }}</span>
+            <span style="font-weight: 700; color: var(--primary);">📅 {{ tour.duration_days }} Days</span>
+            <span style="font-weight: 700; color: var(--accent); font-size: 18px;">Rs. {{ tour.base_price }}</span>
+        </div>
+
+        {% if tour.images %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 40px;">
+                {% for image in tour.images %}
+                    <img src="{{ image.image }}" alt="{{ tour.title }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div style="background: var(--light-bg); padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--accent);">
+            <p style="font-size: 16px; line-height: 1.8; color: var(--text-dark); margin: 0;">{{ tour.description|linebreaks }}</p>
+        </div>
+
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <a href="{% url 'book_tour' tour.id %}" class="btn btn-primary btn-lg">Book This Tour</a>
+            <a href="/dashboard/" class="btn btn-secondary btn-lg">Back to All Tours</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

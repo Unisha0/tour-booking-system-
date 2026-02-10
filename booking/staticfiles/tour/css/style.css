@@ -1,0 +1,22 @@
+body { font-family: Arial; margin:0; display:flex; }
+.sidebar {
+    width:220px;
+    background:#222;
+    color:#fff;
+    height:100vh;
+    padding:20px;
+}
+.sidebar a {
+    display:block;
+    color:white;
+    margin:10px 0;
+    text-decoration:none;
+}
+.main { padding:20px; flex:1; }
+.cards { display:flex; gap:20px; }
+.card {
+    border:1px solid #ccc;
+    padding:10px;
+    width:200px;
+}
+.card img { width:100%; }

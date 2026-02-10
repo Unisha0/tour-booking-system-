@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Tours - Sajilo Yatra{% endblock %}
+
+{% block content %}
+    <div class="section" style="background: var(--white);">
+        <h2 class="section-title">Explore Our Tours</h2>
+        <p class="section-subtitle">Choose from 7 amazing destinations across Nepal</p>
+
+        <div class="cards-grid">
+            {% for tour in tours %}
+                <div class="tour-card">
+                    <div class="tour-image">
+                        {% if tour.images.all %}
+                            {% for image in tour.images.all %}
+                                {% if forloop.first %}
+                                    <img src="{{ image.image.url }}" alt="{{ tour.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            {% if forloop.counter == 1 %}⛰️{% elif forloop.counter == 2 %}🏔️{% elif forloop.counter == 3 %}🏙️{% elif forloop.counter == 4 %}🌄{% elif forloop.counter == 5 %}🗻{% elif forloop.counter == 6 %}🕉️{% else %}🏞️{% endif %}
+                        {% endif %}
+                    </div>
+                    <div class="tour-info">
+                        <div class="tour-destination">{{ tour.destination }}</div>
+                        <h3 class="tour-title">{{ tour.title }}</h3>
+                        <div class="tour-meta">
+                            <span class="tour-meta-item">📅 {{ tour.duration_days }} Days</span>
+                            <span class="tour-meta-item">👥 Group Discounts</span>
+                        </div>
+                        <div class="tour-price">From Rs. {{ tour.base_price|add:0 }}</div>
+                        <p class="tour-description">
+                            {{ tour.description|truncatewords:15 }}
+                        </p>
+                        
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'book_tour' tour.id %}" class="btn btn-primary" style="width: 100%;">Book Now</a>
+                        {% else %}
+                            <button class="btn btn-primary" style="width: 100%;" onclick="showLoginPrompt()">Book Now</button>
+                        {% endif %}
+                        
+                        <a href="#tour-{{ tour.id }}" class="btn" style="width: 100%; background: var(--light-bg); color: var(--primary); margin-top: 10px; border: 1px solid var(--border-color);">View Details</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <p style="font-size: 18px; color: var(--text-gray);">No tours available at the moment</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- ========== LOGIN PROMPT MODAL ========== -->
+        <div id="loginModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+            <div style="background: var(--white); padding: 40px; border-radius: 8px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                <h2 style="color: var(--primary); margin-bottom: 15px; font-weight: 800;">Sign Up to Book Tours</h2>
+                <p style="color: var(--text-gray); margin-bottom: 30px; font-size: 16px;">
+                    Create an account to book amazing tours and manage your bookings. It only takes a minute!
+                </p>
+                
+                <div style="display: flex; gap: 15px; flex-direction: column;">
+                    <a href="/signup/" class="btn btn-primary btn-lg" style="text-align: center; width: 100%;">Create Account Now</a>
+                    <a href="/login/" class="btn" style="background: var(--light-bg); color: var(--primary); padding: 12px 25px; border-radius: 5px; text-align: center; width: 100%; font-weight: 600; text-decoration: none; border: 1px solid var(--border-color);">Already have an account?</a>
+                </div>
+                
+                <button onclick="closeLoginPrompt()" style="background: none; border: none; float: right; font-size: 24px; cursor: pointer; margin-top: -50px; color: var(--text-gray);">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLoginPrompt() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function closeLoginPrompt() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLoginPrompt();
+            }
+        });
+    </script>
+{% endblock %}

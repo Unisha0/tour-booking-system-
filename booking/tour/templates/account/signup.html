@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load i18n socialaccount %}
+
+{% block title %}{% trans "Sign Up" %} - Sajilo Yatra{% endblock %}
+
+{% block content %}
+<div class="section" style="background: white; min-height: 70vh; display: flex; align-items: center;">
+    <div style="max-width: 500px; margin: 0 auto; width: 100%; padding: 40px 30px;">
+        
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 36px; font-weight: 800; color: var(--primary); margin-bottom: 10px;">
+                ✈️ Join the Adventure
+            </h1>
+            <p style="color: var(--text-gray); font-size: 16px; margin: 0;">
+                Create an account to book your perfect Nepal tour
+            </p>
+        </div>
+
+        {% if socialaccount_providers %}
+        <div style="margin-bottom: 30px;">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for provider in socialaccount_providers %}
+                    {% if provider.id == 'google' %}
+                    <a href="{% provider_login_url provider.id %}" class="btn" style="background: white; color: var(--text-dark); border: 2px solid var(--border-color); padding: 12px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; text-align: center; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='20' height='20'%3E%3Cpath fill='%234285F4' d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z'/%3E%3Cpath fill='%2334A853' d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z'/%3E%3Cpath fill='%23FBBC05' d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z'/%3E%3Cpath fill='%23EA4335' d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z'/%3E%3Cpath fill='none' d='M1 1h22v22H1z'/%3E%3C/svg%3E" alt="Google" style="width: 20px; height: 20px;">
+                        {% trans "Sign up with Google" %}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="position: relative; margin: 30px 0;">
+            <div style="border-top: 1px solid var(--border-color);"></div>
+            <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: white; padding: 0 15px; color: var(--text-gray); font-size: 14px;">
+                {% trans "OR" %}
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                <strong>{% trans "Error:" %}</strong>
+                {{ form.non_field_errors.0 }}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>{% trans "Email Address" %}</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="alert alert-error" style="margin-top: 8px;">
+                        {{ form.email.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>{% trans "Password" %}</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <div class="alert alert-error" style="margin-top: 8px;">
+                        {{ form.password1.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>{% trans "Confirm Password" %}</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <div class="alert alert-error" style="margin-top: 8px;">
+                        {{ form.password2.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; padding: 12px 25px;">
+                {% trans "Create Account" %}
+            </button>
+        </form>
+
+        <div style="margin-top: 25px; padding: 20px; background: var(--light-bg); border-radius: 8px; text-align: center;">
+            <p style="color: var(--text-gray); font-size: 14px; margin: 0;">
+                {% trans "Already have an account?" %} 
+                <a href="{% url 'account_login' %}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                    {% trans "Sign in here" %}
+                </a>
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

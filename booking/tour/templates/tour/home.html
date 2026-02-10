@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Sajilo Yatra Tour Booking{% endblock %}
+
+{% block content %}
+    <!-- ========== HERO SECTION ========== -->
+    <div class="hero">
+        <video class="hero-video" autoplay muted loop playsinline>
+            <source src="https://videos.pexels.com/video-files/4629266/4629266-hd_1280_720_30fps.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <h1>Discover Nepal's Magic</h1>
+            <p>Explore stunning mountain peaks, spiritual temples, and breathtaking landscapes</p>
+            <div class="hero-buttons">
+                <a href="/tours/" class="btn btn-primary btn-lg">Explore Tours</a>
+                {% if not user.is_authenticated %}
+                    <a href="/signup/" class="btn btn-secondary btn-lg">Start Your Journey</a>
+                {% else %}
+                    <a href="/dashboard/" class="btn btn-secondary btn-lg">View Dashboard</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========== FEATURED TOURS ========== -->
+    <div class="section" style="background: var(--light-bg);">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h2 class="section-title">Featured Tours</h2>
+            <p class="section-subtitle">Our most popular destinations</p>
+            
+            <div class="cards-grid">
+                {% for tour in featured_tours %}
+                    <div class="tour-card">
+                        <div class="tour-image">
+                            {% if tour.images.all %}
+                                {% for image in tour.images.all %}
+                                    {% if forloop.first %}
+                                        <img src="{{ image.image.url }}" alt="{{ tour.title }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px 8px 0 0;">
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {% if forloop.counter == 1 %}⛰️{% elif forloop.counter == 2 %}🏔️{% else %}🏙️{% endif %}
+                            {% endif %}
+                            <span class="tour-badge">Featured</span>
+                        </div>
+                        <div class="tour-info">
+                            <div class="tour-destination">{{ tour.destination }}</div>
+                            <h3 class="tour-title">{{ tour.title }}</h3>
+                            <div class="tour-meta">
+                                <span class="tour-meta-item">📅 {{ tour.duration_days }} Days</span>
+                                <span class="tour-meta-item">👥 Group Discounts</span>
+                            </div>
+                            <div class="tour-price">From Rs. {{ tour.base_price }}</div>
+                            <p class="tour-description">
+                                {{ tour.description|truncatewords:18 }}
+                            </p>
+                            <a href="/tours/" class="btn btn-primary" style="width: 100%;">View Details</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <p style="font-size: 18px; color: var(--text-gray);">No featured tours available yet</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/tours/" class="btn btn-primary btn-lg">View All Tours →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== FEATURED HOTELS ========== -->
+    <div class="section" style="background: white;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h2 class="section-title">Featured Hotels</h2>
+            <p class="section-subtitle">Stay options for your tour bookings</p>
+
+            <div class="cards-grid">
+                {% for hotel in featured_hotels %}
+                    <div class="card" style="text-align: center;">
+                        <div class="card-image" style="padding: 0; background: var(--light-bg);">
+                            {% if hotel.hotel_image %}
+                                <img src="{{ hotel.hotel_image.url }}" alt="{{ hotel.name }}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px 8px 0 0;">
+                            {% else %}
+                                <div style="height: 140px; display: grid; place-items: center; font-size: 42px;">🏨</div>
+                            {% endif %}
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">{{ hotel.name }}</h3>
+                            <p class="card-description">NRs {{ hotel.price_per_day }} per day</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <p style="font-size: 18px; color: var(--text-gray);">No hotels added yet</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div style="text-align: center; margin-top: 35px;">
+                <a href="/hotels/" class="btn btn-primary btn-lg">View All Hotels →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== HOW IT WORKS ========== -->
+    <div class="section">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Prototype system flow from discovery to confirmation</p>
+
+        <style>
+            .flow-chart {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 18px;
+                align-items: center;
+                justify-content: center;
+                margin-top: 30px;
+            }
+            .flow-step {
+                background: white;
+                border-radius: 16px;
+                padding: 22px 18px;
+                width: 230px;
+                box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+                text-align: center;
+                border-top: 4px solid transparent;
+            }
+            .flow-step h3 {
+                margin: 10px 0 8px;
+                color: var(--text-dark);
+                font-size: 18px;
+            }
+            .flow-step p {
+                margin: 0;
+                color: var(--text-gray);
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .flow-icon {
+                width: 58px;
+                height: 58px;
+                border-radius: 14px;
+                display: grid;
+                place-items: center;
+                color: white;
+                font-size: 26px;
+                margin: 0 auto;
+            }
+            .flow-arrow {
+                width: 46px;
+                height: 46px;
+                border-radius: 50%;
+                display: grid;
+                place-items: center;
+                background: linear-gradient(135deg, #17A2B8 0%, #1E6B9E 100%);
+                color: white;
+                font-size: 20px;
+                box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+            }
+            @media (max-width: 900px) {
+                .flow-arrow {
+                    display: none;
+                }
+            }
+        </style>
+
+        <div class="flow-chart">
+            <div class="flow-step" style="border-top-color: #17A2B8;">
+                <div class="flow-icon" style="background: linear-gradient(135deg, #17A2B8 0%, #4DD0E1 100%);">🔎</div>
+                <h3>Discover Tours</h3>
+                <p>Browse destinations, view images, and compare tour details.</p>
+            </div>
+
+            <div class="flow-arrow">➜</div>
+
+            <div class="flow-step" style="border-top-color: #1E6B9E;">
+                <div class="flow-icon" style="background: linear-gradient(135deg, #1E6B9E 0%, #4A90E2 100%);">🧭</div>
+                <h3>Customize Plan</h3>
+                <p>Select days, hotels, and add-ons to shape your itinerary.</p>
+            </div>
+
+            <div class="flow-arrow">➜</div>
+
+            <div class="flow-step" style="border-top-color: #2E86C1;">
+                <div class="flow-icon" style="background: linear-gradient(135deg, #2E86C1 0%, #5DADE2 100%);">🧾</div>
+                <h3>Book & Pay</h3>
+                <p>Create booking, confirm price, and proceed to payment.</p>
+            </div>
+
+            <div class="flow-arrow">➜</div>
+
+            <div class="flow-step" style="border-top-color: #17A2B8;">
+                <div class="flow-icon" style="background: linear-gradient(135deg, #17A2B8 0%, #48C9B0 100%);">✅</div>
+                <h3>Confirmation</h3>
+                <p>Payment recorded, booking stored, and dashboard updated.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== CTA SECTION ========== -->
+    <div class="section">
+        <div style="background: linear-gradient(135deg, #1E6B9E 0%, #17A2B8 100%); padding: 60px; border-radius: 8px; text-align: center; color: white;">
+            <h2 style="font-size: 40px; margin-bottom: 15px; font-weight: 800;">Ready to Explore Nepal?</h2>
+            <p style="font-size: 18px; margin-bottom: 30px; opacity: 0.9;">Start your adventure with our Tour Booking System</p>
+            
+            {% if user.is_authenticated %}
+                <a href="/dashboard/" class="btn btn-secondary btn-lg" style="background: white; color: #1E6B9E; border: none;">Go to Dashboard</a>
+            {% else %}
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a href="/signup/" class="btn btn-secondary btn-lg" style="background: white; color: #1E6B9E; border: none;">Create Account</a>
+                    <a href="/tours/" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 15px 40px; border-radius: 5px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block;">Browse Tours</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

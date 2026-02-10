@@ -1,42 +1,135 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Sajilo Yatra | Dashboard</title>
-    <link rel="stylesheet" href="{% static 'tour/css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'tour/css/pages.css' %}">
-</head>
-<body>
+{% extends 'base.html' %}
 
-<div class="sidebar">
-    <h2>Sajilo Yatra</h2>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="Transaction.html">Transactions</a>
-    <a href="Ticket.html">Tickets</a>
-    <a href="Fav.html">Favorites</a>
-    <a href="message.html">Messages</a>
-    <a href="setting.html">Settings</a>
-</div>
+{% block title %}Dashboard - Sajilo Yatra{% endblock %}
 
-<div class="main">
-    <h2>Available Tours</h2>
+{% block content %}
+    <div class="section" style="background: var(--white);">
+        {% if user.is_authenticated %}
+            <h2 class="section-title">Welcome back, {{ user.first_name|default:user.username }}! 👋</h2>
+        {% else %}
+            <h2 class="section-title">Explore Our Amazing Tours 🌍</h2>
+        {% endif %}
+        <p class="section-subtitle">Explore and book amazing tours across Nepal</p>
+        
+        {% if not user.is_authenticated %}
+            <div style="background: #D1ECF1; border-left: 5px solid #17A2B8; padding: 15px 20px; border-radius: 8px; margin-bottom: 30px; text-align: center;">
+                <p style="margin: 0; color: #0C5460; font-weight: 600;">
+                    👀 <strong>VIEW MODE:</strong> Browse tours freely! Sign in to book your adventure.
+                </p>
+            </div>
+        {% endif %}
 
-    <div class="cards">
-        <div class="card">
-            <img src="{% static 'tour/images/mustang.png' %}">
-            <h3>Mustang Tour</h3>
-            <p>7 Days Adventure</p>
-            <span>Rs. 80,000</span>
+        <!-- SEARCH -->
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="search-input" placeholder="🔍 Search tours by name or destination..." 
+                   style="width: 100%; max-width: 600px; padding: 12px 20px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 15px; transition: all 0.3s; background: white; color: var(--text-dark);">
         </div>
 
-        <div class="card">
-            <img src="{% static 'tour/images/image.png' %}">
-            <h3>Pokhara Tour</h3>
-            <p>5 Days Relax</p>
-            <span>Rs. 35,000</span>
+        <!-- TOURS GRID -->
+        <div class="cards-grid" id="tours-container">
+            {% for tour in tours %}
+                <div class="tour-card" data-title="{{ tour.title|lower }}" data-destination="{{ tour.destination|lower }}">
+                    <div class="tour-image">
+                        {% if tour.images %}
+                            {% for image in tour.images %}
+                                {% if forloop.first %}
+                                    <img src="{{ image.image }}" alt="{{ tour.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            {% if forloop.counter == 1 %}⛰️{% elif forloop.counter == 2 %}🏔️{% elif forloop.counter == 3 %}🏙️{% elif forloop.counter == 4 %}🌄{% elif forloop.counter == 5 %}🗻{% elif forloop.counter == 6 %}🕉️{% else %}🏞️{% endif %}
+                        {% endif %}
+                    </div>
+                    <div class="tour-info">
+                        <div class="tour-destination">{{ tour.destination }}</div>
+                        <h3 class="tour-title">{{ tour.title }}</h3>
+                        <div class="tour-meta">
+                            <span class="tour-meta-item">📅 {{ tour.duration_days }} Days</span>
+                            <span class="tour-meta-item">👥 Group Tours</span>
+                        </div>
+                        <div class="tour-price">From Rs. {{ tour.base_price }}</div>
+                        <p class="tour-description">
+                            {{ tour.description|truncatewords:15 }}
+                        </p>
+                        <div style="display: flex; gap: 10px;">
+                            <a href="{% url 'book_tour' tour.id %}" class="btn btn-primary" style="flex: 1;">Book Now</a>
+                            <button class="btn" style="flex: 1; background: var(--light-bg); color: var(--primary); border: 1px solid var(--border-color);" onclick="openModal({{ tour.id }}, '{{ tour.title|escapejs }}', '{{ tour.destination|escapejs }}', {{ tour.duration_days }}, {{ tour.base_price }}, '{{ tour.description|escapejs }}')">Details</button>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <p style="font-size: 18px; color: var(--text-gray);">No tours available</p>
+                </div>
+            {% endfor %}
         </div>
     </div>
-</div>
 
-</body>
-</html>
+    <!-- DETAILS MODAL -->
+    <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; overflow-y: auto;">
+        <div style="background: white; padding: 40px; border-radius: 8px; max-width: 600px; width: 90%; margin: 50px auto; box-shadow: 0 10px 40px rgba(0,0,0,0.15); position: relative;">
+            <button onclick="closeModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text-gray);">✕</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <style>
+        #search-input {
+            border: 1px solid var(--border-color) !important;
+        }
+
+        #search-input:focus {
+            outline: none !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(30, 107, 158, 0.1) !important;
+        }
+    </style>
+
+    <script>
+        const modal = document.getElementById('modal');
+        const modalBody = document.getElementById('modal-body');
+
+        function openModal(id, title, destination, days, price, description) {
+            modalBody.innerHTML = `
+                <h2 style="color: var(--primary); margin-bottom: 15px; font-weight: 800;">Tour Details</h2>
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 5px 0; color: var(--primary);">${title}</h3>
+                    <p style="color: var(--accent); font-size: 14px; margin: 0; text-transform: uppercase; font-weight: 700;">📍 ${destination}</p>
+                </div>
+                <div style="background: var(--light-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+                    <p style="margin: 0; color: var(--text-dark);"><strong>Duration:</strong> ${days} Days</p>
+                    <p style="margin: 10px 0 0 0; color: var(--text-dark);"><strong>Price:</strong> <span style="color: var(--accent); font-size: 20px; font-weight: 700;">Rs. ${price}</span></p>
+                </div>
+                <p style="color: var(--text-gray); line-height: 1.6; margin-bottom: 25px;">${description}</p>
+                <a href="/book/${id}/" style="display: inline-block; background: var(--primary); color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: 600; cursor: pointer; border: none;">Book This Tour →</a>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        const tourCards = document.querySelectorAll('.tour-card');
+
+        searchInput.addEventListener('keyup', function() {
+            const query = this.value.toLowerCase();
+            tourCards.forEach(card => {
+                const title = card.dataset.title;
+                const destination = card.dataset.destination;
+                if (title.includes(query) || destination.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+{% endblock %}
