@@ -1,0 +1,85 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}Tourist Details - Admin Panel{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'admin_tourists_list' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+        ← Back to Tourists
+    </a>
+</div>
+
+<div class="page-header">
+    <h1>👤 {{ tourist.name }}</h1>
+    <p>Tourist profile and booking history</p>
+</div>
+
+<!-- Tourist Details -->
+<div class="section-card">
+    <h2 class="section-title" style="margin-bottom: 20px;">Profile Information</h2>
+    <div class="detail-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-size: 13px; color: var(--text-gray); font-weight: 600; margin-bottom: 5px;">Full Name</div>
+            <div style="font-size: 15px; color: var(--text-dark); font-weight: 500;">{{ tourist.name }}</div>
+        </div>
+        <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-size: 13px; color: var(--text-gray); font-weight: 600; margin-bottom: 5px;">Email</div>
+            <div style="font-size: 15px; color: var(--text-dark); font-weight: 500;">{{ tourist.email }}</div>
+        </div>
+        <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-size: 13px; color: var(--text-gray); font-weight: 600; margin-bottom: 5px;">Phone</div>
+            <div style="font-size: 15px; color: var(--text-dark); font-weight: 500;">{{ tourist.phone }}</div>
+        </div>
+        <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-size: 13px; color: var(--text-gray); font-weight: 600; margin-bottom: 5px;">Member Since</div>
+            <div style="font-size: 15px; color: var(--text-dark); font-weight: 500;">{{ tourist.created_at|date:"M d, Y" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking History -->
+<div class="section-card">
+    <h2 class="section-title" style="margin-bottom: 20px;">📅 Booking History</h2>
+    
+    {% if bookings %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Tour</th>
+                    <th>Persons</th>
+                    <th>Total Price</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td><strong>#{{ booking.id }}</strong></td>
+                    <td>{{ booking.tour.title }}</td>
+                    <td>{{ booking.persons }}</td>
+                    <td>Rs. {{ booking.total_price }}</td>
+                    <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if booking.status == 'confirmed' %}
+                            <span class="badge badge-success">Confirmed</span>
+                        {% elif booking.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% else %}
+                            <span class="badge badge-danger">Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_booking_detail' booking.id %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; padding: 40px; color: var(--text-gray);">No bookings yet</p>
+    {% endif %}
+</div>
+{% endblock %}

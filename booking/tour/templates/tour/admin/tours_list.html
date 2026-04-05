@@ -1,0 +1,85 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}All Tours - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🗺️ All Tours</h1>
+    <p>Manage tour packages and their details</p>
+</div>
+
+<div class="section-card">
+    <div class="section-header" style="margin-bottom: 25px;">
+        <h2 class="section-title">Tour Packages</h2>
+        <a href="{% url 'admin_tour_create' %}" class="btn-primary">+ Add New Tour</a>
+    </div>
+
+    <!-- Filters -->
+    <form method="get" style="display: flex; gap: 15px; margin-bottom: 25px;">
+        <input type="text" name="search" placeholder="🔍 Search tours..." 
+               value="{{ search_query }}" style="flex: 1; padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 14px;">
+        
+        <select name="active" style="padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 14px;" onchange="this.form.submit()">
+            <option value="">All Tours</option>
+            <option value="true" {% if active_filter == 'true' %}selected{% endif %}>Active Only</option>
+            <option value="false" {% if active_filter == 'false' %}selected{% endif %}>Inactive Only</option>
+        </select>
+        
+        <button type="submit" class="btn-primary">Search</button>
+    </form>
+
+    <!-- Tours Table -->
+    {% if tours %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Destination</th>
+                    <th>Duration</th>
+                    <th>Base Price</th>
+                    <th>Total Bookings</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tour in tours %}
+                <tr>
+                    <td><strong>#{{ tour.id }}</strong></td>
+                    <td>{{ tour.title }}</td>
+                    <td>{{ tour.destination }}</td>
+                    <td>{{ tour.duration_days }} Days</td>
+                    <td><strong>Rs. {{ tour.base_price }}</strong></td>
+                    <td>{{ tour.booking_count }}</td>
+                    <td>{{ tour.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if tour.is_active %}
+                            <span class="badge badge-success">✅ Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">❌ Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{% url 'admin_tour_detail' tour.id %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">👁️ View</a>
+                            <a href="{% url 'admin_tour_edit' tour.id %}" style="color: var(--warning); text-decoration: none; font-weight: 600;">✏️ Edit</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 20px; text-align: center; color: var(--text-gray);">
+            Showing {{ tours.count }} tour(s)
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px; color: var(--text-gray);">
+            <div style="font-size: 48px; margin-bottom: 15px;">🗺️</div>
+            <p style="font-size: 18px; margin-bottom: 10px;">No tours found</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

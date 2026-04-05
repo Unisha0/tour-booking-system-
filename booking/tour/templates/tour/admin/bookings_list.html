@@ -1,0 +1,151 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}All Bookings - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filters {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        align-items: center;
+    }
+
+    .filter-input {
+        padding: 10px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .filter-select {
+        padding: 10px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 14px;
+        background: var(--white);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-sm {
+        padding: 5px 12px;
+        font-size: 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-view {
+        background: var(--primary);
+        color: var(--white);
+    }
+
+    .btn-view:hover {
+        background: var(--primary-light);
+    }
+
+    .btn-cancel {
+        background: var(--danger);
+        color: var(--white);
+    }
+
+    .btn-cancel:hover {
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📅 All Bookings</h1>
+    <p>Manage and view all tour bookings</p>
+</div>
+
+<div class="section-card">
+    <!-- Filters -->
+    <form method="get" class="filters">
+        <input type="text" name="search" placeholder="🔍 Search by tourist name, email or tour..." 
+               value="{{ search_query }}" class="filter-input" style="flex: 1;">
+        
+        <select name="status" class="filter-select" onchange="this.form.submit()">
+            <option value="">All Status</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+        
+        <button type="submit" class="btn-primary">Filter</button>
+    </form>
+
+    <!-- Bookings Table -->
+    {% if bookings %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tourist Name</th>
+                    <th>Email</th>
+                    <th>Tour</th>
+                    <th>Persons</th>
+                    <th>Days</th>
+                    <th>Hotel</th>
+                    <th>Total Price</th>
+                    <th>Booking Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td><strong>#{{ booking.id }}</strong></td>
+                    <td>{{ booking.tourist.name }}</td>
+                    <td>{{ booking.tourist.email|truncatewords:2 }}</td>
+                    <td>{{ booking.tour.title }}</td>
+                    <td>{{ booking.persons }}</td>
+                    <td>{{ booking.days }}</td>
+                    <td>{{ booking.hotel.name|default:"No Hotel" }}</td>
+                    <td><strong>Rs. {{ booking.total_price }}</strong></td>
+                    <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if booking.status == 'confirmed' %}
+                            <span class="badge badge-success">✅ Confirmed</span>
+                        {% elif booking.status == 'pending' %}
+                            <span class="badge badge-warning">⏳ Pending</span>
+                        {% else %}
+                            <span class="badge badge-danger">❌ Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'admin_booking_detail' booking.id %}" class="btn-sm btn-view">👁️ View</a>
+                            {% if booking.status != 'cancelled' %}
+                                <a href="{% url 'admin_cancel_booking' booking.id %}" class="btn-sm btn-cancel" 
+                                   onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                    ❌ Cancel
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 20px; text-align: center; color: var(--text-gray);">
+            Showing {{ bookings.count }} booking(s)
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px; color: var(--text-gray);">
+            <div style="font-size: 48px; margin-bottom: 15px;">📅</div>
+            <p style="font-size: 18px; margin-bottom: 10px;">No bookings found</p>
+            <p style="font-size: 14px;">Try adjusting your search or filters</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

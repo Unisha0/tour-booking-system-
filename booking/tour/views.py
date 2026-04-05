@@ -88,8 +88,24 @@ def dashboard(request):
             'base_price': tour.base_price,
             'images': [{'image': img.image.url} for img in tour.images.all()]
         })
+    
+    # Check if user has an active booking
+    has_active_booking = False
+    active_booking = None
+    if request.user.is_authenticated:
+        try:
+            tourist = Tourist.objects.get(user=request.user)
+            active_booking = tourist.get_active_booking()
+            has_active_booking = active_booking is not None
+        except Tourist.DoesNotExist:
+            pass
 
-    return render(request, 'tour/dashboard.html', {'tours': tours})
+    context = {
+        'tours': tours,
+        'has_active_booking': has_active_booking,
+        'active_booking': active_booking,
+    }
+    return render(request, 'tour/dashboard.html', context)
 
 
 # ---------- Tour Details & Booking ----------
@@ -103,6 +119,16 @@ def book_tour(request, tour_id):
     if not tourist:
         messages.info(request, 'Please complete your profile to continue.')
         return redirect('complete_profile')
+
+    # Check if user already has an active booking (pending or confirmed)
+    existing_booking = Booking.objects.filter(
+        tourist=tourist,
+        status__in=['pending', 'confirmed']
+    ).first()
+    
+    if existing_booking:
+        messages.warning(request, f'You already have an active booking for {existing_booking.tour.title}. Please complete or cancel it before making a new booking.')
+        return redirect('my_bookings')
 
     if request.method == 'POST':
         form = BookingForm(request.POST)
@@ -172,7 +198,7 @@ def payment_gateway(request, booking_id):
         'booking': booking,
         'payment': payment,
         'total_price': booking.computed_total_price,
-        'payment_methods': ['esewa', 'khalti', 'offline']
+        'payment_methods': ['esewa', 'khalti', 'bank']
     }
     return render(request, 'tour/payment_gateway.html', context)
 
@@ -191,6 +217,33 @@ def payment_process(request, booking_id):
     
     if request.method == 'POST':
         payment_status = request.POST.get('payment_status')  # 'success' or 'failed'
+        
+        # Get verification credentials
+        verify_phone = request.POST.get('verify_phone', '').strip()
+        verify_password = request.POST.get('verify_password', '').strip()
+        
+        # Demo credentials validation
+        verification_failed = False
+        error_message = ''
+        
+        # Check demo credentials based on payment method
+        if payment.payment_method == 'esewa':
+            if verify_phone != '9800000000' or verify_password != '1234':
+                verification_failed = True
+                error_message = 'Incorrect eSewa credentials. Use Phone: 9800000000, PIN: 1234'
+        elif payment.payment_method == 'khalti':
+            if verify_phone != '9811111111' or verify_password != '1234':
+                verification_failed = True
+                error_message = 'Incorrect Khalti credentials. Use Phone: 9811111111, PIN: 1234'
+        elif payment.payment_method == 'bank':
+            # For bank, any reference ID is accepted
+            if not verify_phone:
+                verification_failed = True
+                error_message = 'Transaction Reference ID is required'
+        
+        if verification_failed:
+            messages.error(request, error_message)
+            return redirect('payment_process', booking_id=booking_id)
         
         if payment_status == 'success':
             # Mark payment as completed

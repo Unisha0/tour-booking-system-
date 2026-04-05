@@ -1,0 +1,297 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}{% if mode == 'create' %}Add New Tour{% else %}Edit {{ tour.title }}{% endif %} - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 14px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .form-textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(30, 107, 158, 0.1);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .form-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-checkbox input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .places-container {
+        border: 2px dashed var(--border-color);
+        padding: 20px;
+        border-radius: 8px;
+        background: var(--light-bg);
+    }
+
+    .place-entry {
+        background: var(--white);
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-add {
+        background: var(--success);
+        color: var(--white);
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-remove {
+        background: var(--danger);
+        color: var(--white);
+        padding: 5px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .image-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .image-preview-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid var(--border-color);
+    }
+
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-delete-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% if mode == 'edit' %}{% url 'admin_tour_detail' tour.id %}{% else %}{% url 'admin_tours_list' %}{% endif %}" 
+       style="color: var(--primary); text-decoration: none; font-weight: 600;">
+        ← Back
+    </a>
+</div>
+
+<div class="page-header">
+    <h1>{% if mode == 'create' %}📝 Add New Tour{% else %}✏️ Edit Tour{% endif %}</h1>
+    <p>{% if mode == 'create' %}Create a new tour package{% else %}Update tour information{% endif %}</p>
+</div>
+
+<div class="section-card">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <h3 style="margin-bottom: 20px; color: var(--primary);">📋 Basic Information</h3>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Tour Title *</label>
+                <input type="text" name="title" class="form-input" 
+                       value="{% if mode == 'edit' %}{{ tour.title }}{% endif %}" 
+                       required placeholder="e.g., Pokhara Tour Package">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Destination *</label>
+                <input type="text" name="destination" class="form-input" 
+                       value="{% if mode == 'edit' %}{{ tour.destination }}{% endif %}" 
+                       required placeholder="e.g., Pokhara, Nepal">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Duration (Days) *</label>
+                <input type="number" name="duration_days" class="form-input" 
+                       value="{% if mode == 'edit' %}{{ tour.duration_days }}{% endif %}" 
+                       required min="1" placeholder="e.g., 5">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Base Price (Rs.) *</label>
+                <input type="number" name="base_price" class="form-input" 
+                       value="{% if mode == 'edit' %}{{ tour.base_price }}{% endif %}" 
+                       required min="0" placeholder="e.g., 15000">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Description *</label>
+            <textarea name="description" class="form-textarea" required placeholder="Detailed tour description...">{% if mode == 'edit' %}{{ tour.description }}{% endif %}</textarea>
+        </div>
+
+        <div class="form-group">
+            <div class="form-checkbox">
+                <input type="checkbox" name="is_active" id="is_active" 
+                       {% if mode == 'create' or tour.is_active %}checked{% endif %}>
+                <label for="is_active" style="margin: 0; cursor: pointer;">Active (visible to users)</label>
+            </div>
+        </div>
+
+        <!-- Tour Images -->
+        <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--border-color);">
+        <h3 style="margin-bottom: 20px; color: var(--primary);">📸 Tour Photos</h3>
+
+        {% if mode == 'edit' and tour.images.all %}
+            <div class="image-preview">
+                {% for image in tour.images.all %}
+                    <div class="image-preview-item">
+                        <img src="{{ image.image.url }}" alt="{{ tour.title }}">
+                        <a href="{% url 'admin_tour_delete_image' image.id %}" 
+                           class="image-delete-btn" 
+                           onclick="return confirm('Delete this image?')"
+                           title="Delete image">×</a>
+                    </div>
+                {% endfor %}
+            </div>
+            <p style="margin: 15px 0; font-size: 14px; color: var(--text-gray);">
+                Current images: {{ tour.images.count }}
+            </p>
+        {% endif %}
+
+        <div class="form-group">
+            <label class="form-label">Upload New Images (Multiple allowed)</label>
+            <input type="file" name="images" class="form-input" multiple accept="image/*">
+            <p style="margin-top: 5px; font-size: 13px; color: var(--text-gray);">
+                Accepted formats: JPG, PNG, WEBP
+            </p>
+        </div>
+
+        <!-- Places Covered -->
+        <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--border-color);">
+        <h3 style="margin-bottom: 20px; color: var(--primary);">📍 Places Covered</h3>
+
+        <div class="places-container" id="places-container">
+            {% if mode == 'edit' %}
+                <p style="margin-bottom: 15px; font-size: 14px; color: var(--text-gray);">
+                    Current places: {{ tour.places.count }}. Add new places below or delete old ones from the detail page.
+                </p>
+            {% endif %}
+            
+            <div id="places-list">
+                <!-- Places will be added here -->
+            </div>
+            
+            <button type="button" class="btn-add" onclick="addPlace()">+ Add Place</button>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+            <a href="{% if mode == 'edit' %}{% url 'admin_tour_detail' tour.id %}{% else %}{% url 'admin_tours_list' %}{% endif %}" 
+               class="btn-primary" style="background: var(--text-gray);">
+                Cancel
+            </a>
+            <button type="submit" class="btn-primary">
+                {% if mode == 'create' %}✅ Create Tour{% else %}💾 Update Tour{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let placeCounter = 0;
+    const isCreateMode = "{{ mode }}" === "create";
+
+    function addPlace() {
+        placeCounter++;
+        const placesList = document.getElementById('places-list');
+        const placeEntry = document.createElement('div');
+        placeEntry.className = 'place-entry';
+        placeEntry.id = `place-${placeCounter}`;
+        placeEntry.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <strong>Place ${placeCounter}</strong>
+                <button type="button" class="btn-remove" onclick="removePlace(${placeCounter})">Remove</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Place Name</label>
+                <input type="text" name="place_title[]" class="form-input" placeholder="e.g., Phewa Lake" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="place_description[]" class="form-textarea" style="min-height: 80px;" placeholder="Brief description of this place..." required></textarea>
+            </div>
+        `;
+        placesList.appendChild(placeEntry);
+    }
+
+    function removePlace(id) {
+        const place = document.getElementById(`place-${id}`);
+        if (place) {
+            place.remove();
+        }
+    }
+
+    // Add one place by default for create mode
+    if (isCreateMode) {
+        addPlace();
+    }
+</script>
+{% endblock %}

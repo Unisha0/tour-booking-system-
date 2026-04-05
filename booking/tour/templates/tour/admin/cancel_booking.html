@@ -1,0 +1,48 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}Cancel Booking - Admin Panel{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'admin_bookings_list' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+        ← Back to Bookings
+    </a>
+</div>
+
+<div class="section-card" style="max-width: 600px; margin: 50px auto;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+        <h2 style="color: var(--danger); margin-bottom: 10px;">Cancel Booking #{{ booking.id }}</h2>
+        <p style="color: var(--text-gray); font-size: 15px;">This action cannot be undone</p>
+    </div>
+    
+    <div style="background: var(--light-bg); padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+        <div style="margin-bottom: 10px;">
+            <strong>Tourist:</strong> {{ booking.tourist.name }}
+        </div>
+        <div style="margin-bottom: 10px;">
+            <strong>Tour:</strong> {{ booking.tour.title }}
+        </div>
+        <div style="margin-bottom: 10px;">
+            <strong>Amount:</strong> Rs. {{ booking.total_price }}
+        </div>
+        <div>
+            <strong>Booking Date:</strong> {{ booking.booking_date|date:"M d, Y" }}
+        </div>
+    </div>
+    
+    <form method="post" style="text-align: center;">
+        {% csrf_token %}
+        <p style="color: var(--text-gray); margin-bottom: 20px;">Are you sure you want to cancel this booking?</p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <a href="{% url 'admin_booking_detail' booking.id %}" class="btn-primary" style="background: var(--text-gray);">
+                ← Go Back
+            </a>
+            <button type="submit" class="btn-danger">
+                ❌ Yes, Cancel Booking
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

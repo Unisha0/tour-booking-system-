@@ -1,0 +1,219 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}{{ tour.title }} - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tour-images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .tour-image-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        aspect-ratio: 1;
+    }
+
+    .tour-image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .places-list {
+        margin-top: 20px;
+    }
+
+    .place-item {
+        background: var(--light-bg);
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 4px solid var(--primary);
+    }
+
+    .place-item h4 {
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+
+    .stats-mini {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .stat-mini {
+        background: var(--light-bg);
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .stat-mini .value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .stat-mini .label {
+        font-size: 13px;
+        color: var(--text-gray);
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="{% url 'admin_tours_list' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+        ← Back to Tours
+    </a>
+    <div style="display: flex; gap: 10px;">
+        <a href="{% url 'admin_tour_edit' tour.id %}" class="btn-primary">✏️ Edit Tour</a>
+        <form method="post" action="{% url 'admin_tour_toggle_status' tour.id %}" style="display: inline;">
+            {% csrf_token %}
+            {% if tour.is_active %}
+                <button type="submit" class="btn-danger" style="padding: 10px 20px; font-size: 14px;">
+                    ❌ Deactivate Tour
+                </button>
+            {% else %}
+                <button type="submit" class="btn-primary" style="background: var(--success); padding: 10px 20px; font-size: 14px;">
+                    ✅ Activate Tour
+                </button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="page-header">
+    <h1>{{ tour.title }}</h1>
+    <p style="display: flex; align-items: center; gap: 15px;">
+        <span>📍 {{ tour.destination }}</span>
+        <span>•</span>
+        <span>📅 {{ tour.duration_days }} Days</span>
+        <span>•</span>
+        <span>💰 Rs. {{ tour.base_price }}</span>
+        <span>•</span>
+        {% if tour.is_active %}
+            <span class="badge badge-success">Active</span>
+        {% else %}
+            <span class="badge badge-danger">Inactive</span>
+        {% endif %}
+    </p>
+</div>
+
+<!-- Statistics -->
+<div class="stats-mini">
+    <div class="stat-mini">
+        <div class="value">{{ total_bookings }}</div>
+        <div class="label">Total Bookings</div>
+    </div>
+    <div class="stat-mini">
+        <div class="value">{{ confirmed_bookings }}</div>
+        <div class="label">Confirmed Bookings</div>
+    </div>
+    <div class="stat-mini">
+        <div class="value">Rs. {{ total_revenue|floatformat:0 }}</div>
+        <div class="label">Total Revenue</div>
+    </div>
+    <div class="stat-mini">
+        <div class="value">{{ tour.images.count }}</div>
+        <div class="label">Photos</div>
+    </div>
+</div>
+
+<!-- Description -->
+<div class="section-card">
+    <h2 class="section-title" style="margin-bottom: 15px;">📝 Description</h2>
+    <div style="line-height: 1.8; color: var(--text-dark); white-space: pre-wrap;">{{ tour.description }}</div>
+</div>
+
+<!-- Tour Images -->
+<div class="section-card">
+    <div class="section-header">
+        <h2 class="section-title">📸 Tour Photos ({{ tour.images.count }})</h2>
+    </div>
+
+    {% if tour.images.all %}
+        <div class="tour-images-grid">
+            {% for image in tour.images.all %}
+                <div class="tour-image-item">
+                    <img src="{{ image.image.url }}" alt="{{ tour.title }}">
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center; padding: 40px; color: var(--text-gray);">No photos added yet</p>
+    {% endif %}
+</div>
+
+<!-- Places Covered -->
+<div class="section-card">
+    <h2 class="section-title" style="margin-bottom: 15px;">📍 Places Covered ({{ tour.places.count }})</h2>
+
+    {% if tour.places.all %}
+        <div class="places-list">
+            {% for place in tour.places.all %}
+                <div class="place-item">
+                    <h4>{{ forloop.counter }}. {{ place.title }}</h4>
+                    <p style="color: var(--text-dark); line-height: 1.6; margin: 0;">{{ place.description }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center; padding: 40px; color: var(--text-gray);">No places added yet</p>
+    {% endif %}
+</div>
+
+<!-- Recent Bookings -->
+<div class="section-card">
+    <h2 class="section-title" style="margin-bottom: 20px;">📅 Recent Bookings</h2>
+    
+    {% if recent_bookings %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Tourist</th>
+                    <th>Persons</th>
+                    <th>Total Price</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in recent_bookings %}
+                <tr>
+                    <td><strong>#{{ booking.id }}</strong></td>
+                    <td>{{ booking.tourist.name }}</td>
+                    <td>{{ booking.persons }}</td>
+                    <td>Rs. {{ booking.total_price }}</td>
+                    <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if booking.status == 'confirmed' %}
+                            <span class="badge badge-success">Confirmed</span>
+                        {% elif booking.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% else %}
+                            <span class="badge badge-danger">Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_booking_detail' booking.id %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; padding: 40px; color: var(--text-gray);">No bookings yet</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}Admin Dashboard - Sajilo Yatra{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Admin Dashboard</h1>
+    <p>Overview of your tour management system</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">{{ total_bookings }}</div>
+        <div class="stat-label">Total Bookings</div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{ confirmed_bookings }}</div>
+        <div class="stat-label">Confirmed Bookings</div>
+    </div>
+
+    <div class="stat-card warning">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-value">{{ pending_bookings }}</div>
+        <div class="stat-label">Pending Bookings</div>
+    </div>
+
+    <div class="stat-card danger">
+        <div class="stat-icon">❌</div>
+        <div class="stat-value">{{ cancelled_bookings }}</div>
+        <div class="stat-label">Cancelled Bookings</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">{{ total_tourists }}</div>
+        <div class="stat-label">Total Tourists</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">🗺️</div>
+        <div class="stat-value">{{ total_tours }}</div>
+        <div class="stat-label">Total Tours</div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">✨</div>
+        <div class="stat-value">{{ active_tours }}</div>
+        <div class="stat-label">Active Tours</div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value">Rs. {{ total_revenue|floatformat:0 }}</div>
+        <div class="stat-label">Total Revenue</div>
+    </div>
+</div>
+
+<!-- Recent Bookings -->
+<div class="section-card">
+    <div class="section-header">
+        <h2 class="section-title">📋 Recent Bookings</h2>
+        <a href="{% url 'admin_bookings_list' %}" class="btn-primary">View All Bookings</a>
+    </div>
+
+    {% if recent_bookings %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tourist</th>
+                    <th>Tour</th>
+                    <th>Persons</th>
+                    <th>Total Price</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in recent_bookings %}
+                <tr>
+                    <td>#{{ booking.id }}</td>
+                    <td>{{ booking.tourist.name }}</td>
+                    <td>{{ booking.tour.title }}</td>
+                    <td>{{ booking.persons }}</td>
+                    <td>Rs. {{ booking.total_price }}</td>
+                    <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if booking.status == 'confirmed' %}
+                            <span class="badge badge-success">Confirmed</span>
+                        {% elif booking.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% else %}
+                            <span class="badge badge-danger">Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_booking_detail' booking.id %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; padding: 40px; color: var(--text-gray);">No bookings yet</p>
+    {% endif %}
+</div>
+
+<!-- Popular Tours -->
+<div class="section-card">
+    <div class="section-header">
+        <h2 class="section-title">🔥 Popular Tours</h2>
+        <a href="{% url 'admin_tours_list' %}" class="btn-primary">View All Tours</a>
+    </div>
+
+    {% if popular_tours %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tour</th>
+                    <th>Destination</th>
+                    <th>Duration</th>
+                    <th>Base Price</th>
+                    <th>Bookings</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tour in popular_tours %}
+                <tr>
+                    <td>{{ tour.title }}</td>
+                    <td>{{ tour.destination }}</td>
+                    <td>{{ tour.duration_days }} Days</td>
+                    <td>Rs. {{ tour.base_price }}</td>
+                    <td>{{ tour.booking_count }}</td>
+                    <td>
+                        {% if tour.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; padding: 40px; color: var(--text-gray);">No tours available</p>
+    {% endif %}
+</div>
+{% endblock %}

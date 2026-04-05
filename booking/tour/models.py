@@ -1,6 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# Custom Admin Model
+class AdminUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=150)
+    email = models.EmailField(unique=True)
+    is_super_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.full_name or self.email
+
+
 # Tourist (User extension)
 class Tourist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -13,6 +26,14 @@ class Tourist(models.Model):
 
     def __str__(self):
         return self.name or self.user.username
+    
+    def has_active_booking(self):
+        """Check if tourist has any active (pending or confirmed) booking"""
+        return self.booking_set.filter(status__in=['pending', 'confirmed']).exists()
+    
+    def get_active_booking(self):
+        """Get the active booking if exists"""
+        return self.booking_set.filter(status__in=['pending', 'confirmed']).first()
 
 
 class Tour(models.Model):
@@ -135,7 +156,7 @@ class Payment(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ('esewa', 'eSewa'),
         ('khalti', 'Khalti'),
-        ('offline', 'Offline'),
+        ('bank', 'Bank Transfer'),
     ]
     
     PAYMENT_STATUS_CHOICES = [

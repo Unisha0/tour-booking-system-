@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, api_views, auth_views
+from . import views, api_views, auth_views, admin_views
 
 urlpatterns = [
     # Landing & Public Pages
@@ -9,7 +9,7 @@ urlpatterns = [
     path('about/', views.about_view, name='about'),
     path('contact/', views.contact_view, name='contact'),
     
-    # Existing URLs
+    # User Authentication URLs
     path('signup/', views.signup_view, name='signup'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -38,4 +38,22 @@ urlpatterns = [
     # Payment API URLs
     path('api/bookings/<int:booking_id>/initiate-payment/', api_views.initiate_payment, name='api_initiate_payment'),
     path('api/bookings/<int:booking_id>/process-payment/', api_views.process_payment, name='api_process_payment'),
+    
+    # Admin URLs
+    path('admin-panel/login/', admin_views.admin_login_view, name='admin_login'),
+    path('admin-panel/signup/', admin_views.admin_signup_view, name='admin_signup'),
+    path('admin-panel/logout/', admin_views.admin_logout_view, name='admin_logout'),
+    path('admin-panel/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
+    path('admin-panel/bookings/', admin_views.admin_bookings_list, name='admin_bookings_list'),
+    path('admin-panel/bookings/<int:booking_id>/', admin_views.admin_booking_detail, name='admin_booking_detail'),
+    path('admin-panel/bookings/<int:booking_id>/cancel/', admin_views.admin_cancel_booking, name='admin_cancel_booking'),
+    path('admin-panel/tourists/', admin_views.admin_tourists_list, name='admin_tourists_list'),
+    path('admin-panel/tourists/<int:tourist_id>/', admin_views.admin_tourist_detail, name='admin_tourist_detail'),
+    path('admin-panel/tours/', admin_views.admin_tours_list, name='admin_tours_list'),
+    path('admin-panel/tours/create/', admin_views.admin_tour_create, name='admin_tour_create'),
+    path('admin-panel/tours/<int:tour_id>/', admin_views.admin_tour_detail, name='admin_tour_detail'),
+    path('admin-panel/tours/<int:tour_id>/edit/', admin_views.admin_tour_edit, name='admin_tour_edit'),
+    path('admin-panel/tours/<int:tour_id>/toggle-status/', admin_views.admin_tour_toggle_status, name='admin_tour_toggle_status'),
+    path('admin-panel/tours/image/<int:image_id>/delete/', admin_views.admin_tour_delete_image, name='admin_tour_delete_image'),
+    path('admin-panel/reports/', admin_views.admin_reports, name='admin_reports'),
 ]

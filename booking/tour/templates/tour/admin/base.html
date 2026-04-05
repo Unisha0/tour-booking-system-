@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard - Sajilo Yatra{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1E6B9E;
+            --primary-light: #2980B9;
+            --accent: #17A2B8;
+            --success: #27AE60;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --light-bg: #F8F9FA;
+            --white: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-gray: #7F8C8D;
+            --border-color: #E0E0E0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--light-bg);
+        }
+
+        /* Navbar */
+        .admin-nav {
+            background: linear-gradient(135deg, #1E6B9E 0%, #17A2B8 100%);
+            padding: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            color: var(--white);
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .nav-brand span {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .nav-menu a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            color: var(--white);
+            font-size: 14px;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            padding: 8px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Main Container */
+        .admin-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--text-gray);
+            font-size: 15px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+
+        .stat-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1E6B9E 0%, #17A2B8 100%);
+            color: var(--white);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 107, 158, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background: var(--light-bg);
+        }
+
+        .table th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .table tbody tr:hover {
+            background: var(--light-bg);
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(243, 156, 18, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+
+        /* Messages */
+        .messages {
+            margin-bottom: 25px;
+        }
+
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .message.success {
+            background: rgba(39, 174, 96, 0.1);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid var(--danger);
+            color: var(--danger);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Admin Navigation -->
+    <nav class="admin-nav">
+        <div class="nav-container">
+            <a href="{% url 'admin_dashboard' %}" class="nav-brand">
+                🛡️ Admin Panel <span>SajiloYatra</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="{% url 'admin_dashboard' %}">📊 Dashboard</a></li>
+                <li><a href="{% url 'admin_bookings_list' %}">📅 Bookings</a></li>
+                <li><a href="{% url 'admin_tourists_list' %}">👥 Tourists</a></li>
+                <li><a href="{% url 'admin_tours_list' %}">🗺️ Tours</a></li>
+                <li><a href="{% url 'admin_reports' %}">📈 Reports</a></li>
+            </ul>
+            <div class="nav-right">
+                <span class="user-info">👤 {{ user.adminuser.full_name }}</span>
+                <a href="{% url 'admin_logout' %}" class="btn-logout">🚪 Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="admin-container">
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="admin-container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

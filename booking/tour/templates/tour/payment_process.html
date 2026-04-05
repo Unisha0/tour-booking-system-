@@ -340,6 +340,15 @@
         </div>
         
         <div class="payment-content">
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; {% if message.tags == 'error' %}background: #ffe5e5; color: #721c24; border-left: 4px solid #dc3545;{% elif message.tags == 'success' %}background: #d4edda; color: #155724; border-left: 4px solid #28a745;{% else %}background: #fff3cd; color: #856404; border-left: 4px solid #ffc107;{% endif %}">
+                        <strong>{% if message.tags == 'error' %}❌{% elif message.tags == 'success' %}✅{% else %}⚠️{% endif %}</strong> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
             <!-- Step Indicator -->
             <div class="step-indicator">
                 <div class="step completed">
@@ -373,15 +382,22 @@
                     </div>
                 </div>
                 
-                <form id="paymentFormElement" onsubmit="processPayment(event)">
-                    <div class="form-group">
-                        <label>eSewa Account Email</label>
-                        <input type="email" id="esewaEmail" placeholder="your.email@example.com" required>
+                <form id="paymentFormElement" onsubmit="return validateForm(event)">
+                    {% csrf_token %}
+                    <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+                        <h4 style="margin-bottom: 10px; color: #155724;">🧪 Demo Credentials</h4>
+                        <p style="color: #155724; font-size: 13px; margin: 5px 0;"><strong>Phone:</strong> 9800000000</p>
+                        <p style="color: #155724; font-size: 13px; margin: 5px 0;"><strong>PIN:</strong> 1234</p>
                     </div>
                     
                     <div class="form-group">
-                        <label>eSewa Password</label>
-                        <input type="password" placeholder="••••••••" required>
+                        <label>eSewa Phone Number</label>
+                        <input type="text" id="verify_phone" name="verify_phone" value="9800000000" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>eSewa PIN</label>
+                        <input type="password" id="verify_password" name="verify_password" value="1234" required>
                     </div>
                     
                     <div class="amount-section">
@@ -404,15 +420,22 @@
                         </div>
                     </div>
                     
-                    <form id="paymentFormElement" onsubmit="processPayment(event)">
+                    <form id="paymentFormElement" onsubmit="return validateForm(event)">
+                        {% csrf_token %}
+                        <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+                            <h4 style="margin-bottom: 10px; color: #155724;">🧪 Demo Credentials</h4>
+                            <p style="color: #155724; font-size: 13px; margin: 5px 0;"><strong>Phone:</strong> 9811111111</p>
+                            <p style="color: #155724; font-size: 13px; margin: 5px 0;"><strong>PIN:</strong> 1234</p>
+                        </div>
+                        
                         <div class="form-group">
-                            <label>Mobile Number</label>
-                            <input type="tel" id="khaltiPhone" placeholder="98XXXXXXXX" pattern="[0-9]{10}" required>
+                            <label>Khalti Phone Number</label>
+                            <input type="text" id="verify_phone" name="verify_phone" value="9811111111" required>
                         </div>
                         
                         <div class="form-group">
                             <label>Khalti PIN</label>
-                            <input type="password" placeholder="••••" pattern="[0-9]{4}" required>
+                            <input type="password" id="verify_password" name="verify_password" value="1234" required>
                         </div>
                         
                         <div class="amount-section">
@@ -422,7 +445,14 @@
                     
                     {% else %}
                     <!-- Bank Transfer Form -->
-                    <form id="paymentFormElement" onsubmit="processPayment(event)">
+                    <form id="paymentFormElement" onsubmit="return validateForm(event)">
+                        {% csrf_token %}
+                        
+                        <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+                            <h4 style="margin-bottom: 10px; color: #155724;">🧪 Demo - Any Reference ID works</h4>
+                            <p style="color: #155724; font-size: 13px; margin: 0;">Enter any reference ID (e.g., BANK123456789)</p>
+                        </div>
+                        
                         <div class="amount-section">
                             <div class="amount-label">Amount to Transfer</div>
                             <div class="amount-value">Rs. {{ total_price }}</div>
@@ -447,13 +477,14 @@
                         
                         <div class="form-group">
                             <label>Transaction Reference ID</label>
-                            <input type="text" id="refId" placeholder="Enter reference ID from bank slip" required>
+                            <input type="text" id="verify_phone" name="verify_phone" value="BANK123456789" required>
+                            <input type="hidden" id="verify_password" name="verify_password" value="bank">
                         </div>
                     {% endif %}
                     
                     <div class="button-group">
                         <a href="{% url 'payment_gateway' booking.id %}" class="btn-cancel" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Cancel</a>
-                        <button type="button" class="btn-pay" onclick="simulateProcessing()">Pay Now</button>
+                        <button type="submit" class="btn-pay">Pay Now</button>
                     </div>
                     
                     <div class="security-info">
@@ -475,6 +506,28 @@
     </div>
     
     <script>
+        function validateForm(event) {
+            event.preventDefault();
+            
+            // Get verification credentials
+            const verifyPhone = document.getElementById('verify_phone').value.trim();
+            const verifyPassword = document.getElementById('verify_password').value.trim();
+            
+            // Validate inputs
+            if (!verifyPhone || !verifyPassword) {
+                alert('Please enter your phone number/username and password to verify your account.');
+                return false;
+            }
+            
+            // Store credentials for submission
+            window.verifyPhone = verifyPhone;
+            window.verifyPassword = verifyPassword;
+            
+            // Proceed with payment processing
+            simulateProcessing();
+            return false;
+        }
+        
         function simulateProcessing() {
             // Hide form and show processing
             document.getElementById('paymentForm').style.display = 'none';
@@ -489,16 +542,18 @@
             const randomDelay = Math.random() * 2000 + 3000; // 3-5 seconds
             
             setTimeout(() => {
-                // 80% chance of success, 20% chance of failure
+                // 80% chance of success, 20% chance of failure (after verification)
                 const isSuccess = Math.random() < 0.8;
                 
                 if (isSuccess) {
-                    // Payment successful - submit form
+                    // Payment successful - submit form with verification credentials
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.innerHTML = `
                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                         <input type="hidden" name="payment_status" value="success">
+                        <input type="hidden" name="verify_phone" value="${window.verifyPhone}">
+                        <input type="hidden" name="verify_password" value="${window.verifyPassword}">
                     `;
                     document.body.appendChild(form);
                     form.submit();

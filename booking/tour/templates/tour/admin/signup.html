@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Signup - Sajilo Yatra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1E6B9E 0%, #17A2B8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 8px;
+            padding: 35px 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            color: #2C3E50;
+            animation: fadeUp 0.6s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-box h2 {
+            margin: 0 0 8px;
+            font-size: 26px;
+            text-align: center;
+            color: #1E6B9E;
+            font-weight: 600;
+        }
+
+        .auth-subtitle {
+            margin: 0 0 25px;
+            font-size: 14px;
+            text-align: center;
+            color: #7F8C8D;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931A 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #34495E;
+        }
+
+        input[type="email"],
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #BDC3C7;
+            border-radius: 5px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1E6B9E;
+            box-shadow: 0 0 0 3px rgba(30, 107, 158, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #1E6B9E 0%, #17A2B8 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 107, 158, 0.3);
+        }
+
+        .error-message {
+            background: #F8D7DA;
+            color: #721C24;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #C82333;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #D4EDDA;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28A745;
+            font-size: 14px;
+        }
+
+        .form-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #7F8C8D;
+        }
+
+        .form-footer a {
+            color: #1E6B9E;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 0;
+        }
+
+        .errorlist li {
+            color: #C82333;
+            font-size: 13px;
+            padding: 3px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-box">
+        <div style="text-align: center;">
+            <span class="admin-badge">🛡️ ADMIN PANEL</span>
+        </div>
+        <h2>Create Admin Account</h2>
+        <p class="auth-subtitle">Register as a new administrator</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                    <div class="error-message">⚠️ {{ message }}</div>
+                {% else %}
+                    <div class="success-message">✅ {{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+                {{ form.full_name }}
+                {% if form.full_name.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.full_name.errors %}
+                            <li>⚠️ {{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.email.errors %}
+                            <li>⚠️ {{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">Password</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.password1.errors %}
+                            <li>⚠️ {{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.password2.errors %}
+                            <li>⚠️ {{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-submit">📝 Create Admin Account</button>
+        </form>
+
+        <div class="form-footer">
+            Already have an account? <a href="{% url 'admin_login' %}">Login here</a><br>
+            <a href="{% url 'home' %}">← Back to User Site</a>
+        </div>
+    </div>
+</body>
+</html>

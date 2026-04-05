@@ -26,6 +26,19 @@ def create_booking(request):
     except Tourist.DoesNotExist:
         return Response({'error': 'Tourist profile not found'}, status=status.HTTP_404_NOT_FOUND)
     
+    # Check if user already has an active booking (pending or confirmed)
+    existing_booking = Booking.objects.filter(
+        tourist=tourist,
+        status__in=['pending', 'confirmed']
+    ).first()
+    
+    if existing_booking:
+        return Response({
+            'error': 'You already have an active booking. Please complete or cancel it before making a new booking.',
+            'existing_booking_id': existing_booking.id,
+            'existing_tour': existing_booking.tour.title
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
     tour_id = request.data.get('tour')
     days = request.data.get('days', 1)
     persons = request.data.get('persons', 1)

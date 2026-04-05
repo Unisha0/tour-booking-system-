@@ -1,0 +1,196 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}Booking #{{ booking.id }} - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-section {
+        background: var(--white);
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .detail-item {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+    }
+
+    .detail-label {
+        font-size: 13px;
+        color: var(--text-gray);
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        font-size: 15px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: var(--white);
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-block;
+    }
+
+    .btn-danger:hover {
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'admin_bookings_list' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+        ← Back to Bookings
+    </a>
+</div>
+
+<div class="page-header">
+    <h1>📋 Booking Details #{{ booking.id }}</h1>
+    <p>Complete information about this booking</p>
+</div>
+
+<!-- Booking Status -->
+<div class="detail-section">
+    <h2 class="section-title" style="margin-bottom: 15px;">Status</h2>
+    {% if booking.status == 'confirmed' %}
+        <span class="badge badge-success" style="font-size: 16px; padding: 8px 16px;">✅ Confirmed</span>
+    {% elif booking.status == 'pending' %}
+        <span class="badge badge-warning" style="font-size: 16px; padding: 8px 16px;">⏳ Pending</span>
+    {% else %}
+        <span class="badge badge-danger" style="font-size: 16px; padding: 8px 16px;">❌ Cancelled</span>
+    {% endif %}
+</div>
+
+<!-- Tourist Information -->
+<div class="detail-section">
+    <h2 class="section-title" style="margin-bottom: 20px;">👤 Tourist Information</h2>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">Name</div>
+            <div class="detail-value">{{ booking.tourist.name }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">{{ booking.tourist.email }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Phone</div>
+            <div class="detail-value">{{ booking.tourist.phone }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Member Since</div>
+            <div class="detail-value">{{ booking.tourist.created_at|date:"M d, Y" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tour Information -->
+<div class="detail-section">
+    <h2 class="section-title" style="margin-bottom: 20px;">🗺️ Tour Information</h2>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">Tour Package</div>
+            <div class="detail-value">{{ booking.tour.title }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Destination</div>
+            <div class="detail-value">{{ booking.tour.destination }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Number of Persons</div>
+            <div class="detail-value">{{ booking.persons }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Number of Days</div>
+            <div class="detail-value">{{ booking.days }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Hotel & Add-ons -->
+<div class="detail-section">
+    <h2 class="section-title" style="margin-bottom: 20px;">🏨 Hotel & Add-ons</h2>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">Hotel</div>
+            <div class="detail-value">{{ booking.hotel.name|default:"No hotel selected" }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Add-ons</div>
+            <div class="detail-value">
+                {% if booking.addons.all %}
+                    {{ booking.addons.all|join:", " }}
+                {% else %}
+                    No add-ons selected
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Information -->
+<div class="detail-section">
+    <h2 class="section-title" style="margin-bottom: 20px;">💰 Payment Information</h2>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">Total Amount</div>
+            <div class="detail-value" style="font-size: 24px; color: var(--success);">Rs. {{ booking.total_price }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Payment Status</div>
+            <div class="detail-value">
+                {% if payment %}
+                    {% if payment.status == 'completed' %}
+                        <span class="badge badge-success">✅ Completed</span>
+                    {% elif payment.status == 'pending' %}
+                        <span class="badge badge-warning">⏳ Pending</span>
+                    {% else %}
+                        <span class="badge badge-danger">❌ Failed</span>
+                    {% endif %}
+                {% else %}
+                    <span class="badge badge-warning">No payment record</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if payment %}
+        <div class="detail-item">
+            <div class="detail-label">Payment Method</div>
+            <div class="detail-value">{{ payment.get_payment_method_display }}</div>
+        </div>
+        {% endif %}
+        <div class="detail-item">
+            <div class="detail-label">Booking Date</div>
+            <div class="detail-value">{{ booking.booking_date|date:"M d, Y H:i" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+{% if booking.status != 'cancelled' %}
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{% url 'admin_cancel_booking' booking.id %}" class="btn-danger"
+       onclick="return confirm('Are you sure you want to cancel this booking?')">
+        ❌ Cancel This Booking
+    </a>
+</div>
+{% endif %}
+{% endblock %}

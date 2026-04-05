@@ -18,6 +18,16 @@
                 </p>
             </div>
         {% endif %}
+        
+        {% if has_active_booking and active_booking %}
+            <div style="background: #FFF3CD; border-left: 5px solid #F39C12; padding: 15px 20px; border-radius: 8px; margin-bottom: 30px; text-align: center;">
+                <p style="margin: 0; color: #856404; font-weight: 600;">
+                    ⚠️ <strong>ACTIVE BOOKING:</strong> You have an active booking for <strong>{{ active_booking.tour.title }}</strong>. 
+                    Please complete or cancel it before making a new booking. 
+                    <a href="{% url 'my_bookings' %}" style="color: #F39C12; text-decoration: underline; font-weight: 700;">View Booking →</a>
+                </p>
+            </div>
+        {% endif %}
 
         <!-- SEARCH -->
         <div style="margin: 30px 0; text-align: center;">
@@ -52,7 +62,19 @@
                             {{ tour.description|truncatewords:15 }}
                         </p>
                         <div style="display: flex; gap: 10px;">
-                            <a href="{% url 'book_tour' tour.id %}" class="btn btn-primary" style="flex: 1;">Book Now</a>
+                            {% if user.is_authenticated %}
+                                {% if has_active_booking %}
+                                    <button class="btn" style="flex: 1; background: #E0E0E0; color: #757575; cursor: not-allowed; border: none;" disabled title="You already have an active booking">
+                                        🔒 Booking Locked
+                                    </button>
+                                {% else %}
+                                    <a href="{% url 'book_tour' tour.id %}" class="btn btn-primary" style="flex: 1;">Book Now</a>
+                                {% endif %}
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn" style="flex: 1; background: var(--primary); color: white; border: none;">
+                                    🔒 Sign In to Book
+                                </a>
+                            {% endif %}
                             <button class="btn" style="flex: 1; background: var(--light-bg); color: var(--primary); border: 1px solid var(--border-color);" onclick="openModal({{ tour.id }}, '{{ tour.title|escapejs }}', '{{ tour.destination|escapejs }}', {{ tour.duration_days }}, {{ tour.base_price }}, '{{ tour.description|escapejs }}')">Details</button>
                         </div>
                     </div>
@@ -88,8 +110,13 @@
     <script>
         const modal = document.getElementById('modal');
         const modalBody = document.getElementById('modal-body');
+        const isAuthenticated = {{ user.is_authenticated|lower }};
 
         function openModal(id, title, destination, days, price, description) {
+            const bookButton = isAuthenticated 
+                ? `<a href="/book/${id}/" style="display: inline-block; background: var(--primary); color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: 600; cursor: pointer; border: none;">Book This Tour →</a>`
+                : `<a href="/login/" style="display: inline-block; background: var(--primary); color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: 600; cursor: pointer; border: none;">🔒 Sign In to Book</a>`;
+            
             modalBody.innerHTML = `
                 <h2 style="color: var(--primary); margin-bottom: 15px; font-weight: 800;">Tour Details</h2>
                 <div style="margin-bottom: 20px;">
@@ -101,7 +128,7 @@
                     <p style="margin: 10px 0 0 0; color: var(--text-dark);"><strong>Price:</strong> <span style="color: var(--accent); font-size: 20px; font-weight: 700;">Rs. ${price}</span></p>
                 </div>
                 <p style="color: var(--text-gray); line-height: 1.6; margin-bottom: 25px;">${description}</p>
-                <a href="/book/${id}/" style="display: inline-block; background: var(--primary); color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: 600; cursor: pointer; border: none;">Book This Tour →</a>
+                ${bookButton}
             `;
             modal.style.display = 'flex';
         }

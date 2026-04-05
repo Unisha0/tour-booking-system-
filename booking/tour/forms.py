@@ -1,8 +1,52 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Tourist, Booking
+from .models import Tourist, Booking, AdminUser
 
 
+# Admin Forms
+class AdminLoginForm(forms.Form):
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={
+        'placeholder': 'admin@example.com',
+        'class': 'form-control'
+    }))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Enter your password',
+        'class': 'form-control'
+    }), label='Password', strip=False)
+
+
+class AdminSignupForm(forms.Form):
+    full_name = forms.CharField(max_length=150, label='Full Name', widget=forms.TextInput(attrs={
+        'placeholder': 'Enter your full name',
+        'class': 'form-control'
+    }))
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={
+        'placeholder': 'admin@example.com',
+        'class': 'form-control'
+    }))
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Create password',
+        'class': 'form-control'
+    }), label='Password', strip=False)
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Confirm password',
+        'class': 'form-control'
+    }), label='Confirm Password', strip=False)
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if AdminUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already registered.")
+        return email
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('password1') != cleaned.get('password2'):
+            self.add_error('password2', "Passwords do not match.")
+        return cleaned
+
+
+# Tourist Forms
 class TouristSignupForm(forms.Form):
     name = forms.CharField(max_length=150, label='Name')
     email = forms.EmailField(label='Email')

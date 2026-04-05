@@ -1,0 +1,80 @@
+{% extends 'tour/admin/base.html' %}
+
+{% block title %}All Tourists - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-bar {
+        margin-bottom: 25px;
+    }
+
+    .search-input {
+        padding: 12px 20px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 14px;
+        width: 100%;
+        max-width: 500px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>👥 All Tourists</h1>
+    <p>Manage registered users and their bookings</p>
+</div>
+
+<div class="section-card">
+    <!-- Search -->
+    <form method="get" class="search-bar">
+        <input type="text" name="search" placeholder="🔍 Search by name, email or phone..." 
+               value="{{ search_query }}" class="search-input">
+        <button type="submit" class="btn-primary" style="margin-left: 10px;">Search</button>
+    </form>
+
+    <!-- Tourists Table -->
+    {% if tourists %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Total Bookings</th>
+                    <th>Joined Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tourist in tourists %}
+                <tr>
+                    <td><strong>#{{ tourist.id }}</strong></td>
+                    <td>{{ tourist.name }}</td>
+                    <td>{{ tourist.email }}</td>
+                    <td>{{ tourist.phone }}</td>
+                    <td>{{ tourist.booking_count }}</td>
+                    <td>{{ tourist.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'admin_tourist_detail' tourist.id %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+                            👁️ View Details
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 20px; text-align: center; color: var(--text-gray);">
+            Showing {{ tourists.count }} tourist(s)
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px; color: var(--text-gray);">
+            <div style="font-size: 48px; margin-bottom: 15px;">👥</div>
+            <p style="font-size: 18px; margin-bottom: 10px;">No tourists found</p>
+            <p style="font-size: 14px;">Try adjusting your search</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
